@@ -66,11 +66,10 @@ node keys.mjs unlink BBC-XXXX-XXXX-XXXX-XXXX         # free a key from its Googl
 
 ### Google sign-in
 
-The download dialog also offers "Sign in with Google" (`GOOGLE_CLIENT_ID` in `wrangler.toml`,
-`googleClientId` in `index.html`; both are public). The first time, the visitor types their key and signs
-in: the key is then **locked to that Google account**, and from then on signing in alone is enough.
-A locked key no longer works without that account, so it can't be passed around. Keys nobody has
-signed in with yet still work on their own, as before.
+Downloading needs **both** an access key and a Google sign-in, every time (`GOOGLE_CLIENT_ID` in
+`wrangler.toml`, `googleClientId` in `index.html`; both are public). The first use locks the key to
+that Google account, and from then on only that account can use it, so a key can't be passed around.
+Neither a key alone nor a Google account alone gets a download.
 
 - One Google account holds one key. Links are extra entries in `GAME_KEYS` (`bind:<KEY>` and
   `acct:<id>`); the key entry itself is untouched, so expiry and `revoke` still apply (revoking also

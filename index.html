@@ -675,7 +675,6 @@ html { scroll-padding-top: 96px; }
         <div class="case__meta">
           <p class="case__num">01</p>
           <span class="lg lg--chip lg--ibm" role="img" aria-label="IBM logo"></span>
-          <p class="case__org">IBM</p>
           <p class="case__tags">Database design · ETL · Google Looker Studio · AWS · QuickSight</p>
           <p class="case__note">All data shown is dummy. The screenshots show design, not results.</p>
         </div>
@@ -759,7 +758,7 @@ html { scroll-padding-top: 96px; }
         <div class="case__meta">
           <p class="case__num">02</p>
           <span class="lg lg--chip lg--google" role="img" aria-label="Google logo"></span>
-          <p class="case__org">Google <span>via Oliver Agency</span></p>
+          <p class="case__org"><span>via Oliver Agency</span></p>
           <p class="case__tags">Python · PLX · ETL · Data modelling · Dashboards</p>
           <p class="case__note">Internal details removed or generalised.</p>
         </div>
@@ -885,7 +884,6 @@ html { scroll-padding-top: 96px; }
         <div class="case__meta">
           <p class="case__num">03</p>
           <span class="lg lg--chip lg--lazada" role="img" aria-label="Lazada logo"></span>
-          <p class="case__org">Lazada</p>
           <p class="case__tags">FBI (proprietary) · Brand tracking · Livestream · WBR</p>
           <p class="case__note">Numbers on each screenshot match the list beneath it.</p>
         </div>
@@ -1139,13 +1137,12 @@ html { scroll-padding-top: 96px; }
   <dialog class="dialog" id="gameDialog" aria-labelledby="gameTitle">
     <form class="dialog__inner" id="gameForm" novalidate>
       <h2 id="gameTitle">Beat Beat City for <span id="gamePlatform">Windows</span></h2>
-      <p id="gameIntro">Enter the access key I sent you and the download starts.</p>
-      <div class="dialog__widget" id="gameGoogle" hidden></div>
+      <p id="gameIntro">Enter the access key I sent you, then sign in with Google. The first time, your key is linked to your Google account, and from then on both are needed to download.</p>
       <label class="field" for="gameKey">Access key</label>
       <input class="field__input" id="gameKey" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="BBC-XXXX-XXXX-XXXX-XXXX" maxlength="40">
+      <div class="dialog__widget" id="gameGoogle"></div>
       <p class="dialog__status" id="gameStatus" role="status" aria-live="polite"></p>
       <div class="dialog__actions">
-        <button class="btn btn--primary" type="submit" id="gameSubmit">Download</button>
         <button class="btn btn--ghost" type="button" id="gameCancel">Cancel</button>
       </div>
       <p class="dialog__hint">No key? <a href="#contact" data-key-request>Email me</a> and I'll send one.</p>
@@ -1270,7 +1267,7 @@ window.SITE_CONFIG = {
   var gameDialog = document.getElementById('gameDialog');
   var gameKey = document.getElementById('gameKey');
   var gameStatus = document.getElementById('gameStatus');
-  var gameSubmit = document.getElementById('gameSubmit');
+  var gameBusy = false;
   var gamePlatform = 'windows';
   var PLATFORM_NAMES = { mac: 'macOS', windows: 'Windows' };
   var keyRequest = 'mailto:' + email + '?subject=' + encodeURIComponent('Beat Beat City access');
@@ -1284,7 +1281,7 @@ window.SITE_CONFIG = {
 
   document.querySelectorAll('[data-game]').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      if (!cfg.gameEndpoint) { location.href = keyRequest; return; }
+      if (!cfg.gameEndpoint || !cfg.googleClientId) { location.href = keyRequest; return; }
       gamePlatform = btn.getAttribute('data-game');
       document.getElementById('gamePlatform').textContent = PLATFORM_NAMES[gamePlatform];
       setGameStatus('');
@@ -1296,14 +1293,13 @@ window.SITE_CONFIG = {
 
   document.getElementById('gameCancel').addEventListener('click', function () { gameDialog.close(); });
 
-  // Ask the Worker for a signed link. `credential` (a Google ID token) and `key` are both optional,
-  // but at least one is needed. The Worker's 403 messages are written for visitors, so show them.
+  // Ask the Worker for a signed link. It needs the access key and a Google ID token (`credential`).
+  // The Worker's 403 messages are written for visitors, so show them.
   function requestGameLink(key, credential) {
-    gameSubmit.disabled = true;
-    setGameStatus(credential ? 'Checking your Google account…' : 'Checking your key…');
-    var payload = { platform: gamePlatform };
-    if (key) payload.key = key;
-    if (credential) payload.credential = credential;
+    if (gameBusy) return;
+    gameBusy = true;
+    setGameStatus('Checking your key and Google account…');
+    var payload = { platform: gamePlatform, key: key, credential: credential };
     fetch(cfg.gameEndpoint + '/unlock', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1318,23 +1314,23 @@ window.SITE_CONFIG = {
       setTimeout(function () { if (gameDialog.open) gameDialog.close(); }, 2500);
     }).catch(function (err) {
       setGameStatus(err.message.indexOf('denied:') === 0
-        ? err.message.slice(7) + (credential ? '' : ' Check it and try again.')
+        ? err.message.slice(7)
         : 'Couldn’t reach the server. Please try again, or email me.', true);
-    }).then(function () { gameSubmit.disabled = false; });
+    }).then(function () { gameBusy = false; });
   }
 
   document.getElementById('gameForm').addEventListener('submit', function (e) {
     e.preventDefault();
     var key = gameKey.value.trim();
-    if (!key) { setGameStatus('Enter your access key, or sign in with Google.', true); gameKey.focus(); return; }
-    requestGameLink(key, null);
+    setGameStatus(gameKey.value.trim() ? 'Now sign in with Google below.' : 'Enter your access key first.', true);
+    if (!gameKey.value.trim()) gameKey.focus();
   });
 
-  // Optional Google sign-in: signing in links the key to the account, and from then on the account
-  // alone is enough. Skipped quietly if no client ID is configured or Google's script can't load.
+  // Google sign-in is the submit step: the key and the signed-in account are both required, and the
+  // first use links the key to that account. Load Google's script lazily, when the dialog first opens.
   var googleReady = null;
   function setupGoogle() {
-    if (!cfg.googleClientId || googleReady) return;
+    if (googleReady) return;
     var box = document.getElementById('gameGoogle');
     googleReady = new Promise(function (resolve, reject) {
       var sc = document.createElement('script');
@@ -1346,13 +1342,17 @@ window.SITE_CONFIG = {
     }).then(function () {
       google.accounts.id.initialize({
         client_id: cfg.googleClientId,
-        callback: function (resp) { requestGameLink(gameKey.value.trim(), resp.credential); }
+        callback: function (resp) {
+          var key = gameKey.value.trim();
+          if (!key) { setGameStatus('Enter your access key first, then sign in again.', true); gameKey.focus(); return; }
+          requestGameLink(key, resp.credential);
+        }
       });
       google.accounts.id.renderButton(box, { type: 'standard', theme: 'outline', size: 'large', text: 'signin_with', width: 280 });
-      box.hidden = false;
-      document.getElementById('gameIntro').textContent =
-        'Sign in with Google to download. First time? Type the access key I sent you in the box below, then sign in, and I’ll link the key to your account. After that, signing in is all you need.';
-    }).catch(function () { googleReady = null; });
+    }).catch(function () {
+      googleReady = null;
+      setGameStatus('Couldn’t load Google sign-in. Reload the page, or email me.', true);
+    });
   }
 
   // ── Screenshot galleries (IBM, Lazada): tabs, as progressive enhancement ──
