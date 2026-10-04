@@ -4,3 +4,5 @@ worker/node_modules/
 worker/.wrangler/
 worker/.dev.vars
 .DS_Store
+beat-beat-city-dist/
+.wrangler/

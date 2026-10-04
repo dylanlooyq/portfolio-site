@@ -38,7 +38,8 @@ fetches the zip from R2 with a normal progress bar (and resume, if the connectio
    wrangler r2 object put beat-beat-city/BeatBeatCity-mac.zip     --file BeatBeatCity-mac.zip     --content-type application/zip --remote
    ```
    On a Mac, zip the `.app` with `ditto -c -k --keepParent "Beat Beat City.app" BeatBeatCity-mac.zip`
-   so permissions survive. Wrangler uploads top out around 300 MB; for bigger builds use `rclone`
+   so permissions survive. Wrangler uploads top out around 300 MB; for bigger builds use
+   `node upload-big.mjs <file> beat-beat-city <key>` (setup is in the header of that file) or `rclone`
    against the bucket's S3 endpoint. To ship a new version, run the same upload again (no redeploy).
 3. **Set the link-signing secret** (any long random string, only the Worker ever sees it)
    ```

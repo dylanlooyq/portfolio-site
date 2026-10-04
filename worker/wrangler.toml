@@ -1,6 +1,8 @@
 name = "dylan-cv"
 main = "index.js"
 compatibility_date = "2026-01-01"
+workers_dev = true
+preview_urls = false
 
 [vars]
 # Comma-separated list of origins allowed to call the Worker (no trailing slash).
@@ -19,4 +21,4 @@ bucket_name = "beat-beat-city"
 # and paste the id it prints here.
 [[kv_namespaces]]
 binding = "GAME_KEYS"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "8f69d647c29744b1a62ef0e68b0ab6d4"
