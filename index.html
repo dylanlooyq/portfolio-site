@@ -400,8 +400,7 @@ html { scroll-padding-top: 96px; }
 .dot { animation: pulse 2.4s ease-out infinite; }
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); } 70%, 100% { box-shadow: 0 0 0 9px transparent; } }
 .hero h1 em { background: linear-gradient(100deg, var(--accent-ink), var(--accent)); -webkit-background-clip: text; background-clip: text; color: transparent; padding-right: .06em; }
-.ledger { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); background: color-mix(in srgb, var(--surface) 88%, transparent); transform: rotate(.6deg); transition: transform .3s; }
-.ledger:hover { transform: rotate(0); }
+.ledger { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); background: color-mix(in srgb, var(--surface) 88%, transparent); }
 .tile { border: 1px solid transparent; transition: border-color .2s, transform .2s; }
 .tile:hover { border-color: var(--accent); transform: translateY(-2px); }
 
@@ -453,7 +452,6 @@ html { scroll-padding-top: 96px; }
 @media (max-width: 920px) {
   .nav { border-radius: 22px; }
   .job__what { padding-left: 20px; }
-  .ledger { transform: none; }
 }
 @media (prefers-reduced-motion: reduce) { .dot { animation: none; } }
 </style>
