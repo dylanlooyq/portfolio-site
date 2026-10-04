@@ -6,7 +6,7 @@ private R2 bucket, not in this (public) repo.
 One-time setup (Cloudflare free tier is enough):
 
 1. **Turnstile widget**: dash.cloudflare.com → Turnstile → Add site. Add the hostname
-   `dylanlooyq.github.io` (plus `localhost` for testing). Copy the **site key** and **secret key**.
+   `dylanloo.dev` (plus `localhost` for testing). Copy the **site key** and **secret key**.
 2. **R2 bucket + upload the CV** (from this `worker/` folder):
    ```
    npm i -g wrangler && wrangler login

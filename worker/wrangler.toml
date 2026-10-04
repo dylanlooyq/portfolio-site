@@ -4,7 +4,7 @@ compatibility_date = "2026-01-01"
 
 [vars]
 # Comma-separated list of origins allowed to call the Worker (no trailing slash).
-ALLOWED_ORIGINS = "https://dylanlooyq.github.io,http://localhost:8000"
+ALLOWED_ORIGINS = "https://dylanloo.dev,http://localhost:8000"
 
 [[r2_buckets]]
 binding = "CV_BUCKET"
