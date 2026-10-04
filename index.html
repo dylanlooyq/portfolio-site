@@ -125,9 +125,9 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 500; letter-spacing: -0.015
   border-bottom: 1px solid var(--line);
 }
 .nav__inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; }
-.nav__brand { font: 600 22px/1 var(--serif); text-decoration: none; letter-spacing: -0.02em; }
+.nav__brand { white-space: nowrap; font: 600 22px/1 var(--serif); text-decoration: none; letter-spacing: -0.02em; }
 .nav__brand span { color: var(--accent); }
-.nav__links { display: flex; gap: clamp(14px, 3vw, 32px); }
+.nav__links { display: flex; gap: clamp(0px, .6vw, 8px); }
 .nav__links a { text-decoration: none; font-size: 14px; color: var(--muted); transition: color .15s; }
 .nav__links a:hover { color: var(--ink); }
 .nav__actions { display: flex; align-items: center; gap: 10px; }
@@ -298,11 +298,13 @@ figcaption { font-size: 13px; color: var(--muted); }
 .job li strong { color: var(--ink); }
 .job p { color: var(--muted); max-width: 70ch; }
 
-.edu { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 40px; margin-top: 24px; padding: 28px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.edu { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 40px; padding: 28px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.edu__school { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.edu__school .lg { width: 150px; height: 66px; padding: 10px 14px; box-shadow: var(--shadow); }
+.edu__school > div { min-width: 0; }
 .edu h3 { font-size: 20px; margin: 6px 0 2px; }
 .edu p { color: var(--muted); font-size: 14.5px; }
 .edu .edu__yrs { font: 400 12px/1 var(--mono); letter-spacing: .08em; color: var(--accent-ink); }
-.edu__skills { grid-column: 1 / -1; padding-top: 22px; border-top: 1px solid var(--line); }
 .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .pills li { font: 400 12.5px/1 var(--mono); padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-2); }
 
@@ -385,9 +387,10 @@ figcaption { font-size: 13px; color: var(--muted); }
 /* Floating pill nav */
 .nav { top: 12px; margin: 12px auto 0; width: min(1120px, 100% - 2 * var(--gutter)); border: 1px solid var(--line); border-radius: 999px; background: color-mix(in srgb, var(--surface) 78%, transparent); box-shadow: var(--shadow); }
 .nav__inner { width: auto; padding-inline: 20px 12px; height: 56px; }
-.nav__links a { padding: 8px 14px; border-radius: 999px; transition: color .15s, background-color .15s; }
+.nav__links a { white-space: nowrap; padding: 8px 12px; border-radius: 999px; transition: color .15s, background-color .15s; }
 .nav__links a:hover { background: var(--surface-2); }
 .nav__links a.is-active { color: var(--ink); background: var(--surface-2); }
+@media (max-width: 1060px) { .nav__links { display: none; } }
 html { scroll-padding-top: 96px; }
 
 /* Hero depth */
@@ -522,6 +525,7 @@ html { scroll-padding-top: 96px; }
 .lg--cred { width: 132px; height: 56px; padding: 9px 14px; }
 .lg--tableau { background-image: url("assets/logos/tableau.svg"); }
 .lg--nus { background-image: url("assets/logos/nus.svg"); }
+.lg--smu { background-image: url("assets/logos/smu.svg"); }
 .lg--linkedin-learning { background-image: url("assets/logos/linkedin-learning.png"); }
 .lg--udemy { background-image: url("assets/logos/udemy.svg"); }
 .lg--icdl { background-image: url("assets/logos/icdl.svg"); }
@@ -615,7 +619,9 @@ html { scroll-padding-top: 96px; }
       <nav class="nav__links" aria-label="Primary">
         <a href="#work">Work</a>
         <a href="#experience">Experience</a>
-        <a href="#credentials">Credentials</a>
+        <a href="#education">Education</a>
+        <a href="#skillset">Skillset</a>
+        <a href="#certifications">Certifications</a>
         <a href="#beyond">Beyond work</a>
         <a href="#contact">Contact</a>
       </nav>
@@ -1144,33 +1150,53 @@ html { scroll-padding-top: 96px; }
           </div>
         </li>
       </ol>
+    </section>
+
+    <!-- ───────── Education ───────── -->
+    <section class="section wrap" id="education">
+      <header class="section__head">
+        <p class="eyebrow">Education</p>
+        <h2>Where I studied.</h2>
+      </header>
 
       <div class="edu">
-        <div>
-          <p class="edu__yrs">2023 – 2025</p>
-          <h3>Singapore Management University</h3>
-          <p>MSc, Quantitative Finance</p>
-        </div>
-        <div>
-          <p class="edu__yrs">2016 – 2020</p>
-          <h3>National University of Singapore</h3>
-          <p>Bachelor of Business Administration</p>
-        </div>
-        <div class="edu__skills">
-          <p class="edu__yrs">Toolkit</p>
-          <ul class="pills">
-            <li>SQL</li><li>Python</li><li>Dashboarding</li><li>Reporting</li>
-            <li>ETL</li><li>Data modelling / ERD</li><li>A/B testing</li>
-            <li>PLX</li><li>Google Cloud</li><li>Looker Studio</li><li>Snowflake</li><li>QlikSense</li><li>FBI (Lazada)</li>
-          </ul>
-        </div>
+        <article class="edu__school">
+          <span class="lg lg--chip lg--smu" role="img" aria-label="Singapore Management University logo"></span>
+          <div>
+            <p class="edu__yrs">2023 – 2025</p>
+            <h3>Singapore Management University</h3>
+            <p>MSc, Quantitative Finance</p>
+          </div>
+        </article>
+        <article class="edu__school">
+          <span class="lg lg--chip lg--nus" role="img" aria-label="National University of Singapore logo"></span>
+          <div>
+            <p class="edu__yrs">2016 – 2020</p>
+            <h3>National University of Singapore</h3>
+            <p>Bachelor of Business Administration</p>
+          </div>
+        </article>
       </div>
     </section>
 
-    <!-- ───────── Credentials ───────── -->
-    <section class="section wrap" id="credentials">
+    <!-- ───────── Skillset ───────── -->
+    <section class="section wrap" id="skillset">
       <header class="section__head">
-        <p class="eyebrow">Credentials</p>
+        <p class="eyebrow">Skillset</p>
+        <h2>What I work with.</h2>
+      </header>
+
+      <ul class="pills">
+        <li>SQL</li><li>Python</li><li>Dashboarding</li><li>Reporting</li>
+        <li>ETL</li><li>Data modelling / ERD</li><li>A/B testing</li>
+        <li>PLX</li><li>Google Cloud</li><li>Looker Studio</li><li>Snowflake</li><li>QlikSense</li><li>FBI (Lazada)</li>
+      </ul>
+    </section>
+
+    <!-- ───────── Certifications ───────── -->
+    <section class="section wrap" id="certifications">
+      <header class="section__head">
+        <p class="eyebrow">Certifications</p>
         <h2>Certified, and still learning.</h2>
       </header>
 
