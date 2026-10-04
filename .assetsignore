@@ -1,0 +1,13 @@
+# Not part of the public site; keep out of the Workers static-assets upload.
+.assetsignore
+.git
+.gitignore
+.claude
+.wrangler
+wrangler.jsonc
+worker
+Resources
+beat-beat-city-dist
+DYLAN.txt
+assets/video/beatbeatcity-gameplay.mp4
+assets/Dylan-Loo-CV.pdf
