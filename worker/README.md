@@ -18,7 +18,7 @@ One-time setup (Cloudflare free tier is enough):
    wrangler secret put TURNSTILE_SECRET     # paste the secret key
    wrangler deploy                          # prints https://dylan-cv.<you>.workers.dev
    ```
-4. **Point the site at it**: edit `../config.js`:
+4. **Point the site at it**: edit the `window.SITE_CONFIG` block near the bottom of `../index.html`:
    ```js
    turnstileSiteKey: "<site key>",
    cvEndpoint: "https://dylan-cv.<you>.workers.dev/cv"
