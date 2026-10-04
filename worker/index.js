@@ -1,8 +1,57 @@
-// Cloudflare Worker: serves the CV PDF only after a Cloudflare Turnstile check passes.
-// The PDF lives in a private R2 bucket (binding CV_BUCKET), never in the public repo.
+// Cloudflare Worker behind dylanlooyq.github.io. Everything it serves lives in private R2
+// buckets, never in the public repo.
+//
+//   POST /cv              Cloudflare Turnstile check, then the CV PDF (CV_BUCKET)
+//   POST /game/unlock     access key + platform, then a signed one-hour download link
+//   GET  /game/download   streams the Beat Beat City build for that link (GAME_BUCKET)
+//
+// Game access keys are KV entries (GAME_KEYS): key = the access key, value = who it was
+// issued to. Mint and revoke them with `node keys.mjs` (see README.md).
 
 const SITEVERIFY = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 const CV_KEY = 'Dylan-Loo-CV.pdf';
+
+// Object names in GAME_BUCKET. The browser only ever sends "mac" or "windows".
+const GAME_FILES = {
+  mac: 'BeatBeatCity-mac.zip',
+  windows: 'BeatBeatCity-windows.zip',
+};
+// Long enough to resume an interrupted download of a big file.
+const LINK_TTL_SECONDS = 60 * 60;
+
+const enc = new TextEncoder();
+
+// Keys are typed by hand, so ignore case and separators and forgive O/0 and I/L/1 mix-ups
+// (the generated alphabet has no O, I or L). Keep in sync with keys.mjs.
+const normalizeKey = (s) => s.toUpperCase().replace(/O/g, '0').replace(/[IL]/g, '1').replace(/[^A-Z0-9]/g, '');
+
+const toB64Url = (buf) => {
+  let s = '';
+  for (const b of new Uint8Array(buf)) s += String.fromCharCode(b);
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+};
+const fromB64Url = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
+
+const hmacKey = (secret, usage) =>
+  crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, [usage]);
+
+async function signLink(secret, platform, expires) {
+  const sig = await crypto.subtle.sign('HMAC', await hmacKey(secret, 'sign'), enc.encode(`${platform}.${expires}`));
+  return `${platform}.${expires}.${toB64Url(sig)}`;
+}
+
+// Returns the platform the link was issued for, or null if it is forged, malformed or expired.
+async function verifyLink(secret, token) {
+  const [platform, expires, sig, extra] = token.split('.');
+  if (extra !== undefined || !sig || !Object.hasOwn(GAME_FILES, platform)) return null;
+  if (!(Number(expires) > Date.now() / 1000)) return null;
+  try {
+    const ok = await crypto.subtle.verify('HMAC', await hmacKey(secret, 'verify'), fromB64Url(sig), enc.encode(`${platform}.${expires}`));
+    return ok ? platform : null;
+  } catch {
+    return null; // sig was not valid base64
+  }
+}
 
 export default {
   async fetch(request, env) {
@@ -21,46 +70,102 @@ export default {
     const fail = (status, msg) =>
       new Response(msg, { status, headers: { ...cors, 'Content-Type': 'text/plain', 'Cache-Control': 'no-store' } });
 
-    if (url.pathname !== '/cv') return fail(404, 'Not found');
+    // A plain browser navigation: no Origin header, no CORS. The signed link is the credential.
+    if (url.pathname === '/game/download') {
+      if (request.method !== 'GET') return fail(405, 'Method not allowed');
+      return download(request, env, url, fail);
+    }
+
+    const route = { '/cv': cv, '/game/unlock': unlock }[url.pathname];
+    if (!route) return fail(404, 'Not found');
     if (request.method === 'OPTIONS') return new Response(null, { status: originOk ? 204 : 403, headers: cors });
     if (request.method !== 'POST') return fail(405, 'Method not allowed');
     if (!originOk) return fail(403, 'Forbidden');
 
-    let token;
+    let body;
     try {
-      ({ token } = await request.json());
+      body = await request.json();
     } catch {
       return fail(400, 'Bad request');
     }
-    if (typeof token !== 'string' || token.length === 0 || token.length > 2048) return fail(400, 'Bad request');
-
-    const body = new FormData();
-    body.append('secret', env.TURNSTILE_SECRET);
-    body.append('response', token);
-    const ip = request.headers.get('CF-Connecting-IP');
-    if (ip) body.append('remoteip', ip);
-
-    let result;
-    try {
-      result = await (await fetch(SITEVERIFY, { method: 'POST', body })).json();
-    } catch {
-      return fail(502, 'Verification unavailable');
-    }
-
-    // The token must be valid AND issued for one of our own sites.
-    const hosts = allowed.map((o) => new URL(o).hostname);
-    if (!result.success || !hosts.includes(result.hostname)) return fail(403, 'Captcha failed');
-
-    const obj = await env.CV_BUCKET.get(CV_KEY);
-    if (!obj) return fail(404, 'CV not uploaded yet');
-
-    return new Response(obj.body, {
-      headers: {
-        ...cors,
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${CV_KEY}"`,
-        'Cache-Control': 'no-store',
-      },
-    });
+    return route(request, env, { body, url, cors, fail, allowed });
   },
 };
+
+async function cv(request, env, { body, cors, fail, allowed }) {
+  const token = body?.token;
+  if (typeof token !== 'string' || token.length === 0 || token.length > 2048) return fail(400, 'Bad request');
+
+  const form = new FormData();
+  form.append('secret', env.TURNSTILE_SECRET);
+  form.append('response', token);
+  const ip = request.headers.get('CF-Connecting-IP');
+  if (ip) form.append('remoteip', ip);
+
+  let result;
+  try {
+    result = await (await fetch(SITEVERIFY, { method: 'POST', body: form })).json();
+  } catch {
+    return fail(502, 'Verification unavailable');
+  }
+
+  // The token must be valid AND issued for one of our own sites.
+  const hosts = allowed.map((o) => new URL(o).hostname);
+  if (!result.success || !hosts.includes(result.hostname)) return fail(403, 'Captcha failed');
+
+  const obj = await env.CV_BUCKET.get(CV_KEY);
+  if (!obj) return fail(404, 'CV not uploaded yet');
+
+  return new Response(obj.body, {
+    headers: {
+      ...cors,
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${CV_KEY}"`,
+      'Cache-Control': 'no-store',
+    },
+  });
+}
+
+// Trade a valid access key for a signed download link. The key is checked here, once; the
+// big file is then fetched with a plain GET so the browser shows progress and can resume.
+async function unlock(request, env, { body, url, cors, fail }) {
+  const { key, platform } = body ?? {};
+  if (typeof key !== 'string' || key.length > 100) return fail(400, 'Bad request');
+  if (typeof platform !== 'string' || !Object.hasOwn(GAME_FILES, platform)) return fail(400, 'Bad request');
+
+  const normalized = normalizeKey(key);
+  const owner = normalized ? await env.GAME_KEYS.get(normalized) : null;
+  if (owner === null) return fail(403, 'Invalid or expired key');
+
+  console.log(`beat-beat-city unlock: ${owner} (${platform})`); // visible with `wrangler tail`
+  const expires = Math.floor(Date.now() / 1000) + LINK_TTL_SECONDS;
+  const token = await signLink(env.DOWNLOAD_SECRET, platform, expires);
+  return new Response(JSON.stringify({ url: `${url.origin}/game/download?t=${encodeURIComponent(token)}` }), {
+    headers: { ...cors, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+  });
+}
+
+async function download(request, env, url, fail) {
+  const platform = await verifyLink(env.DOWNLOAD_SECRET, url.searchParams.get('t') || '');
+  if (!platform) return fail(403, 'This link has expired. Go back to the site and enter your key again.');
+
+  // `range: request.headers` makes R2 honour Range, so an interrupted download can resume.
+  const obj = await env.GAME_BUCKET.get(GAME_FILES[platform], { range: request.headers });
+  if (!obj) return fail(404, 'This build has not been uploaded yet.');
+
+  const headers = new Headers({
+    'Content-Type': 'application/zip',
+    'Content-Disposition': `attachment; filename="${GAME_FILES[platform]}"`,
+    'Accept-Ranges': 'bytes',
+    'Cache-Control': 'private, no-store',
+    ETag: obj.httpEtag,
+  });
+  let status = 200;
+  if (obj.range && request.headers.has('Range')) {
+    const start = obj.range.offset ?? 0;
+    const end = obj.range.length === undefined ? obj.size - 1 : start + obj.range.length - 1;
+    headers.set('Content-Range', `bytes ${start}-${end}/${obj.size}`);
+    status = 206;
+  }
+  return new Response(obj.body, { status, headers });
+}

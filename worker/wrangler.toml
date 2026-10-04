@@ -9,3 +9,14 @@ ALLOWED_ORIGINS = "https://dylanloo.dev,http://localhost:8000"
 [[r2_buckets]]
 binding = "CV_BUCKET"
 bucket_name = "dylan-cv"
+
+# Beat Beat City builds (private; the site only ever links to the Worker).
+[[r2_buckets]]
+binding = "GAME_BUCKET"
+bucket_name = "beat-beat-city"
+
+# Access keys for Beat Beat City. Create with `wrangler kv namespace create GAME_KEYS`
+# and paste the id it prints here.
+[[kv_namespaces]]
+binding = "GAME_KEYS"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
