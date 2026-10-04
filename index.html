@@ -471,6 +471,11 @@ html { scroll-padding-top: 96px; }
 .flow .flow__hl b { color: var(--accent-ink); }
 
 .gallery { margin-top: 40px; }
+.gallery__head { margin-bottom: 18px; padding-top: 28px; border-top: 1px solid var(--line); }
+.gallery__head .eyebrow { margin-bottom: 6px; }
+.case .gallery__title { font: 500 clamp(20px, 2.4vw, 26px)/1.2 var(--serif); letter-spacing: 0; text-transform: none; color: var(--ink); margin-bottom: 6px; }
+.gallery__head p:last-child { font-size: 14.5px; color: var(--muted); max-width: 62ch; }
+.shown-tag { display: inline-block; margin-top: 6px; padding: 6px 12px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font: 500 11.5px/1.2 var(--mono); letter-spacing: .06em; text-decoration: none; }
 .tabs { display: none; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
 .gallery.is-tabs .tabs { display: flex; }
 .tabs button { font: 500 13px/1 var(--sans); padding: 10px 16px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; transition: all .15s; }
@@ -963,6 +968,7 @@ html { scroll-padding-top: 96px; }
                 <li>Showed age distribution, test and control groups, campaign code and status, plus APE and VNB generated.</li>
                 <li>Let the team track the test through the experiment and helped ExCo pick the best model for the business.</li>
               </ul>
+              <a class="shown-tag" href="#singlifeGallery">Screenshots shown below ↓</a>
             </div>
           </div>
 
@@ -972,6 +978,11 @@ html { scroll-padding-top: 96px; }
 
           <!-- Screenshots -->
           <div class="gallery" id="singlifeGallery">
+            <div class="gallery__head">
+              <p class="eyebrow">Sample of work</p>
+              <h4 class="gallery__title">Cross Sell A/B test dashboard</h4>
+              <p>The Singlife dashboard I can show publicly: four views from the QlikSense app built for the cross-sell team and ExCo. Row-level data is cropped out.</p>
+            </div>
             <div class="tabs" role="tablist" aria-label="Cross Sell dashboard screenshots">
               <button type="button" role="tab" id="sl-tab-1" aria-controls="sl-panel-1" aria-selected="true">Channel funnel</button>
               <button type="button" role="tab" id="sl-tab-2" aria-controls="sl-panel-2" aria-selected="false" tabindex="-1">Control v test</button>
