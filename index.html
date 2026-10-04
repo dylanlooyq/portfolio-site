@@ -3,9 +3,469 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dylan's Portfolio Site</title>
+  <title>Dylan Loo — Data Analyst</title>
+  <meta name="description" content="Dylan Loo is a Singapore-based data analyst who builds the pipelines, models and dashboards that turn messy data into decisions. Google, IBM, Lazada, SingLife.">
+  <meta name="theme-color" content="#f6f3ec" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+  <meta property="og:title" content="Dylan Loo — Data Analyst">
+  <meta property="og:description" content="Pipelines, models and dashboards that turn messy data into decisions.">
+  <meta property="og:type" content="website">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Apply the saved theme before first paint to avoid a flash -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <p>Dylan's Portfolio Site</p>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav" id="top">
+    <div class="wrap nav__inner">
+      <a class="nav__brand" href="#top" aria-label="Dylan Loo, home">DL<span>.</span></a>
+      <nav class="nav__links" aria-label="Primary">
+        <a href="#work">Work</a>
+        <a href="#experience">Experience</a>
+        <a href="#beyond">Beyond work</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <div class="nav__actions">
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch theme" title="Switch theme">
+          <svg class="icon icon--moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+          <svg class="icon icon--sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </button>
+        <button class="btn btn--ghost btn--sm" type="button" data-cv>CV&nbsp;↓</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ───────── Hero ───────── -->
+    <section class="hero wrap">
+      <div class="hero__copy">
+        <figure class="headshot" id="headshot">
+          <img src="assets/headshot.jpg" width="176" height="176" alt="Portrait of Dylan Loo"
+               onerror="this.parentNode.remove()">
+        </figure>
+        <p class="eyebrow">Data Analyst · Singapore</p>
+        <h1>I build the data plumbing <em>behind</em> the decision.</h1>
+        <p class="lede">
+          Pipelines, data models and dashboards that people actually use. Most recently at
+          <strong>IBM</strong>, and before that supporting Google's APAC Android team,
+          Lazada's marketing intelligence function and SingLife's sales analytics.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="#work">See selected work</a>
+          <a class="btn btn--ghost" href="#contact">Get in touch</a>
+        </div>
+      </div>
+
+      <aside class="ledger" aria-label="Selected results">
+        <p class="ledger__title"><span class="dot"></span> Impact ledger</p>
+        <dl class="ledger__grid">
+          <div class="tile">
+            <dt>Man-hours saved / month</dt>
+            <dd><span class="num" data-count="70" data-suffix="+">70+</span></dd>
+            <p class="tile__src">ETL &amp; reporting automation · Google</p>
+          </div>
+          <div class="tile">
+            <dt>Less manual intervention</dt>
+            <dd><span class="num" data-count="90" data-suffix="%">90%</span></dd>
+            <p class="tile__src">Snowflake ETL · SingLife</p>
+          </div>
+          <div class="tile">
+            <dt>On-time delivery</dt>
+            <dd><span class="num" data-count="95" data-suffix="%">95%</span> <span class="from">from 40%</span></dd>
+            <p class="tile__src">E-commerce ops · Changi Airport Group</p>
+          </div>
+          <div class="tile">
+            <dt>Android retention, APAC</dt>
+            <dd><span class="num" data-count="5" data-prefix="+" data-suffix="%">+5%</span></dd>
+            <p class="tile__src">Unified data models · Google</p>
+          </div>
+        </dl>
+      </aside>
+    </section>
+
+    <!-- ───────── Work ───────── -->
+    <section class="section wrap" id="work">
+      <header class="section__head">
+        <p class="eyebrow">Selected work</p>
+        <h2>Three places I've shipped analytics.</h2>
+      </header>
+
+      <!-- IBM -->
+      <article class="case" id="ibm">
+        <div class="case__meta">
+          <p class="case__num">01</p>
+          <p class="case__org">IBM</p>
+          <p class="case__tags">Dashboarding · Survey analytics · Automated insights</p>
+          <p class="case__note">Dashboard shown uses dummy data.</p>
+        </div>
+        <div class="case__body">
+          <h3>CSAT &amp; Experience dashboard</h3>
+          <p class="case__lede">
+            One view of how users rate five areas of a service team, benchmarked
+            against an OKR, with the "so what" written for you.
+          </p>
+
+          <div class="stats">
+            <div class="stat"><span class="stat__n">4.87</span><span class="stat__l">Overall CSAT</span></div>
+            <div class="stat"><span class="stat__n">101.4%</span><span class="stat__l">of the 4.8 OKR</span></div>
+            <div class="stat"><span class="stat__n">5</span><span class="stat__l">service categories</span></div>
+            <div class="stat"><span class="stat__n">5</span><span class="stat__l">survey cycles of trend</span></div>
+          </div>
+
+          <figure class="shot">
+            <a href="assets/ibm-csat-dashboard-full.jpg" target="_blank" rel="noopener" aria-label="Open the full dashboard image in a new tab">
+              <img src="assets/ibm-csat-dashboard.jpg" width="2161" height="1588" loading="lazy"
+                   alt="CSAT and Experience dashboard showing an overall score of 4.87 against a 4.8 target, an automated insights panel, a sentiment breakdown by category and a CSAT trend by category across five survey cycles.">
+            </a>
+            <figcaption>Dummy data. Click to open the full dashboard, including the theme tables below the fold.</figcaption>
+          </figure>
+
+          <div class="cols">
+            <div>
+              <h4>The problem</h4>
+              <p>Survey scores alone don't say what to fix. Stakeholders needed to see which category was slipping, why, and what to do next, without reading hundreds of free-text comments.</p>
+            </div>
+            <div>
+              <h4>What I built</h4>
+              <ul>
+                <li>An overall CSAT scorecard tracked against the OKR.</li>
+                <li>A sentiment breakdown and trend line per category, with the target drawn in.</li>
+                <li>An <strong>Automated Insights</strong> panel that turns the numbers into <em>Observation → Trend → Action to take</em>.</li>
+                <li>Ranked positive and negative themes per category, with counts, so the driver behind each score is visible.</li>
+              </ul>
+            </div>
+            <div>
+              <h4>What it surfaces</h4>
+              <p>Product Relevancy / Design is the weak spot (4.46 and falling), driven by outdated playbooks, while Knowledge Management is climbing (4.86 → 4.97). The dashboard points straight at the fix.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Google -->
+      <article class="case" id="google">
+        <div class="case__meta">
+          <p class="case__num">02</p>
+          <p class="case__org">Google <span>via Oliver Agency</span></p>
+          <p class="case__tags">Python · ETL · Data modelling · Dashboards · Google Cloud</p>
+          <p class="case__note">Internal details removed or generalised.</p>
+        </div>
+        <div class="case__body">
+          <h3>APAC Android analytics: from ad-hoc requests to a reliable data layer</h3>
+          <p class="case__lede">
+            I was the data analyst behind APAC Android's sales and brand reporting. The work fell into two halves:
+            answering questions fast, and building the infrastructure so the questions got easier to answer.
+          </p>
+
+          <div class="stats">
+            <div class="stat"><span class="stat__n">70+</span><span class="stat__l">man-hours saved per month</span></div>
+            <div class="stat"><span class="stat__n">+5%</span><span class="stat__l">Android retention, APAC</span></div>
+            <div class="stat"><span class="stat__n">3×</span><span class="stat__l">best ad-hoc speed-up vs. expected</span></div>
+          </div>
+
+          <div class="split">
+            <div class="split__col">
+              <h4><span class="chip">A</span> Analytics</h4>
+              <ul class="tight">
+                <li><strong>BAU:</strong> monthly and bi-monthly update decks, with Python scripts producing the sales and branding views, and a refreshed APAC dashboard to present.</li>
+                <li><strong>Core:</strong> took over a quarterly regional fact sheet. Documented it end-to-end with an ERD, then reproduced it for each subsequent quarter.</li>
+                <li><strong>Strategy:</strong> led the Switch &amp; Churn analytics project for APAC, feeding the FY25 Android retention strategy.</li>
+              </ul>
+            </div>
+            <div class="split__col">
+              <h4><span class="chip">B</span> Infrastructure</h4>
+              <ul class="tight">
+                <li><strong>ETL:</strong> streamlined ETL, dashboards and reporting workflows on Google Cloud.</li>
+                <li><strong>Data models:</strong> built and maintained models that put sales and marketing teams on the same numbers.</li>
+                <li><strong>Dashboards:</strong> refreshed the APAC Android dashboard, redesigned for readability.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Ad-hoc turnaround -->
+          <figure class="viz" aria-labelledby="tatTitle">
+            <figcaption id="tatTitle">
+              <strong>Ad-hoc requests: expected vs. actual turnaround</strong>
+              <span>Three requests, each from a different marketing team.</span>
+            </figcaption>
+            <div class="tat" role="img" aria-label="Turnaround for three ad-hoc requests. Brand survey count: expected 3 working days, delivered in 1. Sales by country, brand, price tier and model: expected 1 working day, delivered in 4 hours. Sales by model: expected 1 working day, delivered in 3 hours.">
+              <div class="tat__row">
+                <p class="tat__label">Brand survey respondent count</p>
+                <div class="tat__bars">
+                  <div class="bar bar--exp" style="--w:100%"><span>Expected · 3 days</span></div>
+                  <div class="bar bar--act" style="--w:33.3%"><span>1 day</span></div>
+                </div>
+              </div>
+              <div class="tat__row">
+                <p class="tat__label">Sales by country, brand, price tier &amp; model</p>
+                <div class="tat__bars">
+                  <div class="bar bar--exp" style="--w:33.3%"><span>Expected · 1 day</span></div>
+                  <div class="bar bar--act" style="--w:16.7%"><span>4 hrs</span></div>
+                </div>
+              </div>
+              <div class="tat__row">
+                <p class="tat__label">Sales by model</p>
+                <div class="tat__bars">
+                  <div class="bar bar--exp" style="--w:33.3%"><span>Expected · 1 day</span></div>
+                  <div class="bar bar--act" style="--w:12.5%"><span>3 hrs</span></div>
+                </div>
+              </div>
+            </div>
+            <p class="viz__foot">Bars share one scale, assuming an 8-hour working day. Each one was delivered with a Python script.</p>
+          </figure>
+
+          <!-- Pipeline diagram -->
+          <figure class="viz" aria-labelledby="pipeTitle">
+            <figcaption id="pipeTitle">
+              <strong>The data layer, simplified</strong>
+              <span>Redrawn generically; real table names are internal.</span>
+            </figcaption>
+            <div class="pipe-scroll" tabindex="0" aria-label="Pipeline diagram, scrolls sideways on small screens">
+            <svg class="pipe" viewBox="0 -14 760 224" role="img" aria-label="Diagram: four source tables feed ETL jobs that write two derived dashboard tables that power the dashboard and stakeholder reports.">
+              <defs>
+                <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/>
+                </marker>
+              </defs>
+              <!-- sources -->
+              <g class="pipe__box">
+                <rect x="4" y="12" width="168" height="34" rx="6"/><text x="88" y="34" text-anchor="middle">Sales</text>
+                <rect x="4" y="64" width="168" height="34" rx="6"/><text x="88" y="86" text-anchor="middle">Sales by device</text>
+                <rect x="4" y="116" width="168" height="34" rx="6"/><text x="88" y="138" text-anchor="middle">Sales by channel</text>
+                <rect x="4" y="168" width="168" height="34" rx="6"/><text x="88" y="190" text-anchor="middle">Sales by retail channel</text>
+              </g>
+              <text class="pipe__cap" x="88" y="6" text-anchor="middle" dy="-0">SOURCE TABLES</text>
+              <!-- ETL -->
+              <g class="pipe__box pipe__box--accent">
+                <rect x="262" y="64" width="116" height="82" rx="8"/>
+                <text x="320" y="110" text-anchor="middle">ETL</text>
+              </g>
+              <!-- derived -->
+              <g class="pipe__box">
+                <rect x="470" y="40" width="150" height="34" rx="6"/><text x="545" y="62" text-anchor="middle">Dashboard: sales</text>
+                <rect x="470" y="136" width="150" height="34" rx="6"/><text x="545" y="158" text-anchor="middle">Dashboard: device</text>
+              </g>
+              <text class="pipe__cap" x="545" y="22" text-anchor="middle">DERIVED TABLES</text>
+              <!-- output -->
+              <g class="pipe__box">
+                <rect x="676" y="82" width="82" height="46" rx="6"/><text x="717" y="109" text-anchor="middle">Dashboard</text>
+              </g>
+              <!-- arrows -->
+              <g class="pipe__lines" marker-end="url(#arr)">
+                <path d="M174 29 C 220 29, 220 90, 260 100" fill="none" marker-end="url(#arr)"/>
+                <path d="M174 81 L 260 95" fill="none" marker-end="url(#arr)"/>
+                <path d="M174 133 L 260 117" fill="none" marker-end="url(#arr)"/>
+                <path d="M174 185 C 220 185, 220 130, 260 122" fill="none" marker-end="url(#arr)"/>
+                <path d="M380 95 C 420 95, 430 57, 468 57" fill="none" marker-end="url(#arr)"/>
+                <path d="M380 115 C 420 115, 430 153, 468 153" fill="none" marker-end="url(#arr)"/>
+                <path d="M622 57 C 650 57, 650 100, 674 104" fill="none" marker-end="url(#arr)"/>
+                <path d="M622 153 C 650 153, 650 112, 674 108" fill="none" marker-end="url(#arr)"/>
+              </g>
+            </svg>
+            </div>
+          </figure>
+        </div>
+      </article>
+
+      <!-- Lazada -->
+      <article class="case" id="lazada">
+        <div class="case__meta">
+          <p class="case__num">03</p>
+          <p class="case__org">Lazada</p>
+          <p class="case__tags">Alibaba Cloud FBI · Brand tracking · Livestream · WBR</p>
+          <p class="case__note">Full write-ups on my Lazada portfolio.</p>
+        </div>
+        <div class="case__body">
+          <h3>Marketing intelligence dashboards for a regional e-commerce leader</h3>
+          <p class="case__lede">
+            As a Senior Analyst on the Marketing Intelligence team, I owned two dashboards that leadership and
+            livestream teams used day to day, and ran the weekly business review against GMV targets.
+          </p>
+
+          <div class="stats">
+            <div class="stat"><span class="stat__n">~30%</span><span class="stat__l">boost in key livestream metrics</span></div>
+            <div class="stat"><span class="stat__n">+2%</span><span class="stat__l">Consideration score growth over 1 year</span></div>
+          </div>
+
+          <div class="links">
+            <a class="linkcard" href="https://dylanlooyq.wordpress.com/2023/03/27/brand-health-tracking-dashboard/" target="_blank" rel="noopener">
+              <span class="linkcard__tag">Dashboard</span>
+              <strong>Brand Health Tracking Dashboard</strong>
+              <span>Gave the CMO fast visibility into brand health study results, built on Alibaba Cloud's FBI.</span>
+              <span class="linkcard__go">Read the write-up <i aria-hidden="true">↗</i></span>
+            </a>
+            <a class="linkcard" href="https://dylanlooyq.wordpress.com/2023/03/27/livestream-dashboard/" target="_blank" rel="noopener">
+              <span class="linkcard__tag">Dashboard</span>
+              <strong>Livestream Dashboard</strong>
+              <span>Let livestream leads track performance and report on mechanic and content changes.</span>
+              <span class="linkcard__go">Read the write-up <i aria-hidden="true">↗</i></span>
+            </a>
+          </div>
+          <p class="case__foot">Also: post-campaign analytics that shaped later marketing efforts and KPI setting.</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- ───────── Experience ───────── -->
+    <section class="section wrap" id="experience">
+      <header class="section__head">
+        <p class="eyebrow">Experience</p>
+        <h2>Where I've worked.</h2>
+      </header>
+
+      <ol class="timeline">
+        <li class="job">
+          <div class="job__when"><span>Apr 2026 –</span> Present</div>
+          <div class="job__what">
+            <h3>IBM <small>Singapore</small></h3>
+            <!-- TODO(Dylan): add your exact IBM job title and 2–3 CV-style bullets -->
+            <p>Building customer-experience analytics, including the CSAT &amp; Experience dashboard above.</p>
+          </div>
+        </li>
+        <li class="job">
+          <div class="job__when"><span>Nov 2023 –</span> Dec 2025</div>
+          <div class="job__what">
+            <h3>Oliver Agency <small>Data Analyst for Google · Singapore</small></h3>
+            <ul>
+              <li>Streamlined ETL processes, dashboards and reporting workflows on Google Cloud, saving <strong>70+ man-hours per month</strong>.</li>
+              <li>Built and maintained data models that aligned cross-functional teams on one set of sales and marketing numbers, contributing to a <strong>5% increase in Android retention</strong> across APAC.</li>
+              <li>Led the Switch &amp; Churn analytics project for APAC, feeding the FY25 Android retention strategy.</li>
+            </ul>
+          </div>
+        </li>
+        <li class="job">
+          <div class="job__when"><span>Nov 2022 –</span> Oct 2023</div>
+          <div class="job__what">
+            <h3>SingLife <small>Data Analyst · Singapore</small></h3>
+            <ul>
+              <li>Designed QlikSense dashboards for sales performance, agent productivity and A/B tests, increasing data accessibility by <strong>30%</strong>.</li>
+              <li>Engineered ETL on Snowflake and documented it with detailed ERDs, cutting manual intervention by <strong>90%</strong> and saving <strong>50+ man-hours</strong> a month.</li>
+            </ul>
+          </div>
+        </li>
+        <li class="job">
+          <div class="job__when"><span>Mar 2022 –</span> Oct 2022</div>
+          <div class="job__what">
+            <h3>Lazada <small>Senior Analyst · Singapore</small></h3>
+            <ul>
+              <li>Directed the Weekly Business Review, keeping discussions aligned to GMV targets.</li>
+              <li>Built the Brand Health and Livestream dashboards on Alibaba Cloud's FBI, streamlining livestream strategy for a <strong>~30% boost</strong> in key metrics.</li>
+              <li>Ran post-campaign analytics that shaped KPI setting and delivered <strong>+2% Consideration</strong> growth over a year.</li>
+            </ul>
+          </div>
+        </li>
+        <li class="job">
+          <div class="job__when"><span>Jun 2020 –</span> Feb 2022</div>
+          <div class="job__what">
+            <h3>Changi Airport Group <small>Senior Associate · Singapore</small></h3>
+            <ul>
+              <li>Managed e-commerce operations, lifting on-time delivery from <strong>40% to 95%</strong>.</li>
+            </ul>
+          </div>
+        </li>
+      </ol>
+
+      <div class="edu">
+        <div>
+          <p class="edu__yrs">2023 – 2025</p>
+          <h3>Singapore Management University</h3>
+          <p>MSc, Quantitative Finance</p>
+        </div>
+        <div>
+          <p class="edu__yrs">2016 – 2020</p>
+          <h3>National University of Singapore</h3>
+          <p>Bachelor of Business Administration</p>
+        </div>
+        <div class="edu__skills">
+          <p class="edu__yrs">Toolkit</p>
+          <ul class="pills">
+            <li>SQL</li><li>Python</li><li>Dashboarding</li><li>Reporting</li>
+            <li>ETL</li><li>Data modelling / ERD</li><li>A/B testing</li>
+            <li>Google Cloud</li><li>Snowflake</li><li>QlikSense</li><li>Alibaba Cloud FBI</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────── Beyond ───────── -->
+    <section class="section wrap" id="beyond">
+      <header class="section__head">
+        <p class="eyebrow">Beyond the day job</p>
+        <h2>Quant curiosity, and a few people-first things.</h2>
+      </header>
+
+      <div class="cards">
+        <article class="card">
+          <p class="card__tag">Master's project · Dec 2023</p>
+          <h3>Peak/trough detection in forex</h3>
+          <p>Combined signal-processing tools (Fourier transform, Kalman filter, Hurst exponent) with traditional technical indicators to pick out peaks and troughs in forex pairs.</p>
+        </article>
+        <article class="card">
+          <p class="card__tag">Competition · Dec 2024</p>
+          <h3>Bloomberg Trading Challenge</h3>
+          <p>Finished in the <strong>top 10% globally</strong>, using sentiment analysis to trade US equities.</p>
+        </article>
+        <article class="card">
+          <p class="card__tag">Leadership · NUS Kent Ridge Hall</p>
+          <h3>Chairman, camp &amp; founder of a DJ club</h3>
+          <p>Led 12 people to run an orientation camp for 250 freshmen, captained a 15-player table tennis team, and founded KRemix, a DJ club I pitched and trained 10 members for.</p>
+        </article>
+        <article class="card">
+          <p class="card__tag">Volunteering · 2023</p>
+          <h3>Mentoring with TomoWork SG</h3>
+          <p>Mentored a graduating polytechnic student with special needs.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ───────── Contact ───────── -->
+    <section class="section wrap contact" id="contact">
+      <div class="contact__box">
+        <p class="eyebrow">Contact</p>
+        <h2>Have a messy dataset and a deadline?</h2>
+        <p class="lede">I'm happy to talk about roles in data and analytics. Email is fastest.</p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="#contact" data-email>Email me</a>
+          <a class="btn btn--ghost" href="https://www.linkedin.com/in/dylanlooyq/" target="_blank" rel="noopener">LinkedIn&nbsp;↗</a>
+          <a class="btn btn--ghost" href="https://github.com/dylanlooyq" target="_blank" rel="noopener">GitHub&nbsp;↗</a>
+          <button class="btn btn--ghost" type="button" data-cv>Download CV&nbsp;↓</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <p>© <span id="year">2026</span> Dylan Loo · Singapore</p>
+      <a href="#top">Back to top ↑</a>
+    </div>
+  </footer>
+
+  <dialog class="dialog" id="cvDialog" aria-labelledby="cvTitle">
+    <form method="dialog" class="dialog__inner">
+      <h2 id="cvTitle">Download my CV</h2>
+      <p>A quick check that you're human, then the PDF downloads.</p>
+      <div id="cvWidget" class="dialog__widget"></div>
+      <p class="dialog__status" id="cvStatus" role="status" aria-live="polite"></p>
+      <button class="btn btn--ghost btn--sm" value="close">Close</button>
+    </form>
+  </dialog>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
