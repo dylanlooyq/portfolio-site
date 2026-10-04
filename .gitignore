@@ -6,3 +6,4 @@ worker/.dev.vars
 .DS_Store
 beat-beat-city-dist/
 .wrangler/
+assets/video/beatbeatcity-gameplay.mp4

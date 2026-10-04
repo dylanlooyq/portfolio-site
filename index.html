@@ -561,6 +561,11 @@ html { scroll-padding-top: 96px; }
 .project__body .card__tag { color: var(--accent-ink); margin-bottom: 14px; }
 .project h4 { font: 500 12px/1.2 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--accent-ink); margin-bottom: 14px; }
 .project__buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.project__watch { margin-top: 22px; }
+.project__watch .btn svg { width: 16px; height: 16px; fill: currentColor; }
+.dialog--video { width: min(960px, calc(100% - 32px)); }
+.dialog--video .dialog__inner { padding: 14px; gap: 12px; justify-items: stretch; }
+.dialog__video { display: block; width: 100%; max-height: calc(100vh - 140px); aspect-ratio: 16 / 9; background: #000; border-radius: calc(var(--radius) - 4px); }
 .project__note { margin-top: 14px; font-size: 13.5px; }
 .project__note a, .dialog__hint a { color: var(--ink); text-underline-offset: 3px; }
 @media (max-width: 760px) { .project__body { grid-template-columns: minmax(0, 1fr); } }
@@ -665,7 +670,7 @@ html { scroll-padding-top: 96px; }
     <section class="section wrap" id="work">
       <header class="section__head">
         <p class="eyebrow">Selected work</p>
-        <h2>Three places I've shipped analytics.</h2>
+        <h2>Four places I've shipped analytics.</h2>
       </header>
 
       <!-- IBM -->
@@ -879,10 +884,51 @@ html { scroll-padding-top: 96px; }
         </div>
       </article>
 
+      <!-- Singlife -->
+      <article class="case" id="singlife">
+        <div class="case__meta">
+          <p class="case__num">03</p>
+          <span class="lg lg--chip lg--singlife" role="img" aria-label="Singlife logo"></span>
+          <p class="case__tags">QlikSense · Snowflake · ETL · ERDs</p>
+          <p class="case__note">No screenshots: this was internal work.</p>
+        </div>
+        <div class="case__body">
+          <h3>Sales analytics dashboards and a Snowflake ETL that runs itself</h3>
+          <p class="case__lede">
+            As a Data Analyst at Singlife, I designed the QlikSense dashboards the sales organisation worked from
+            and engineered the Snowflake ETL behind them, documented with ERDs.
+          </p>
+
+          <div class="stats">
+            <div class="stat"><span class="stat__n">30%</span><span class="stat__l">more data accessibility</span></div>
+            <div class="stat"><span class="stat__n">90%</span><span class="stat__l">less manual intervention in ETL</span></div>
+            <div class="stat"><span class="stat__n">50+</span><span class="stat__l">man-hours saved per month</span></div>
+          </div>
+
+          <div class="split">
+            <div class="split__col">
+              <h4><span class="chip">A</span> Dashboards</h4>
+              <ul class="tight">
+                <li><strong>Sales performance:</strong> QlikSense dashboards for tracking sales results.</li>
+                <li><strong>Agent productivity:</strong> a view of how agents were performing.</li>
+                <li><strong>A/B tests:</strong> reporting on experiment results, in the same tool as everything else.</li>
+              </ul>
+            </div>
+            <div class="split__col">
+              <h4><span class="chip">B</span> Data engineering</h4>
+              <ul class="tight">
+                <li><strong>ETL:</strong> engineered on <strong>Snowflake</strong>, cutting manual intervention by 90%.</li>
+                <li><strong>Documentation:</strong> every pipeline documented with detailed ERDs.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </article>
+
       <!-- Lazada -->
       <article class="case" id="lazada">
         <div class="case__meta">
-          <p class="case__num">03</p>
+          <p class="case__num">04</p>
           <span class="lg lg--chip lg--lazada" role="img" aria-label="Lazada logo"></span>
           <p class="case__tags">FBI (proprietary) · Brand tracking · Livestream · WBR</p>
           <p class="case__note">Numbers on each screenshot match the list beneath it.</p>
@@ -1081,6 +1127,9 @@ html { scroll-padding-top: 96px; }
             <p class="card__tag">Personal project · Game</p>
             <h3>Beat Beat City</h3>
             <p>A neon-lit rhythm game I built in my spare time. It's invite-only for now: the Mac and Windows downloads unlock with a key from me.</p>
+            <div class="project__buttons project__watch">
+              <button class="btn btn--ghost" type="button" id="watchGameplay"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Watch gameplay</button>
+            </div>
           </div>
           <div class="project__get">
             <h4>Download</h4>
@@ -1132,6 +1181,13 @@ html { scroll-padding-top: 96px; }
       <p class="dialog__status" id="cvStatus" role="status" aria-live="polite"></p>
       <button class="btn btn--ghost btn--sm" value="close">Close</button>
     </form>
+  </dialog>
+
+  <dialog class="dialog dialog--video" id="videoDialog" aria-label="Beat Beat City gameplay">
+    <div class="dialog__inner">
+      <video class="dialog__video" id="gameplayVideo" controls playsinline preload="none" poster="assets/video/beatbeatcity-gameplay-poster.jpg"></video>
+      <div class="dialog__actions"><button class="btn btn--ghost" type="button" id="videoClose">Close</button></div>
+    </div>
   </dialog>
 
   <dialog class="dialog" id="gameDialog" aria-labelledby="gameTitle">
@@ -1262,6 +1318,18 @@ window.SITE_CONFIG = {
       });
     });
   });
+
+  // ── Beat Beat City gameplay video: loaded only when the dialog opens, stopped when it closes ──
+  var videoDialog = document.getElementById('videoDialog');
+  var gameplayVideo = document.getElementById('gameplayVideo');
+  document.getElementById('watchGameplay').addEventListener('click', function () {
+    if (!gameplayVideo.getAttribute('src')) gameplayVideo.src = 'assets/video/beatbeatcity-gameplay-web.mp4';
+    videoDialog.showModal();
+    gameplayVideo.play().catch(function () {});   // autoplay can be blocked; the controls still work
+  });
+  document.getElementById('videoClose').addEventListener('click', function () { videoDialog.close(); });
+  videoDialog.addEventListener('close', function () { gameplayVideo.pause(); });
+  videoDialog.addEventListener('click', function (e) { if (e.target === videoDialog) videoDialog.close(); });   // click the backdrop
 
   // ── Beat Beat City: access key → signed download link from the Worker ──
   var gameDialog = document.getElementById('gameDialog');
