@@ -533,8 +533,8 @@ html { scroll-padding-top: 96px; }
 .lg--udemy { background-image: url("assets/logos/udemy.svg"); }
 
 /* ───────── Credentials ───────── */
-.creds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.cred { display: flex; flex-direction: column; gap: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; }
+.creds { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+.cred { grid-column: span 3; display: flex; flex-direction: column; gap: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; }
 .cred__issuer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .cred__issuer .lg { box-shadow: var(--shadow); }
 .cred__org { font: 500 11.5px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); text-align: right; }
@@ -547,14 +547,14 @@ html { scroll-padding-top: 96px; }
 .cred__meta a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; transition: text-decoration-color .2s, color .2s; }
 .cred__meta a:hover { color: var(--accent-ink); text-decoration-color: var(--accent); }
 .cred--wide { grid-column: 1 / -1; flex-direction: row; align-items: flex-start; gap: 32px; }
-.cred--wide .cred__issuer { flex: none; flex-direction: column; align-items: flex-start; gap: 12px; }
+.cred--wide .cred__issuer { flex: 0 0 200px; flex-direction: column; align-items: flex-start; gap: 12px; }
 .cred--wide .cred__org { text-align: left; }
 .cred--wide .cred__list { flex: 1; }
 .cred--wide .cred__list { grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .cred--wide .cred__item { padding: 0 0 0 24px; border-top: 0; border-left: 1px solid var(--line); }
 .cred--wide .cred__item:first-child { padding-left: 0; border-left: 0; }
-@media (max-width: 920px) { .creds { grid-template-columns: repeat(2, 1fr); } .cred--wide { flex-direction: column; gap: 18px; } .cred--wide .cred__issuer { flex-direction: row; align-items: center; justify-content: space-between; } .cred--wide .cred__org { text-align: right; } .cred:nth-child(3) { grid-column: 1 / -1; } .cred--wide .cred__list { grid-template-columns: 1fr; gap: 14px; } .cred--wide .cred__item, .cred--wide .cred__item:first-child { padding: 14px 0 0; border-left: 0; border-top: 1px solid var(--line); } .cred--wide .cred__item:first-child { padding-top: 0; border-top: 0; } }
-@media (max-width: 620px) { .creds { grid-template-columns: 1fr; } }
+@media (max-width: 920px) { .creds { grid-template-columns: repeat(2, 1fr); } .cred--wide { flex-direction: column; gap: 18px; } .cred--wide .cred__issuer { flex: none; flex-direction: row; align-items: center; justify-content: space-between; } .cred--wide .cred__org { text-align: right; } .cred { grid-column: span 1; } .cred--wide { grid-column: 1 / -1; } .cred--wide .cred__list { grid-template-columns: 1fr; gap: 14px; } .cred--wide .cred__item, .cred--wide .cred__item:first-child { padding: 14px 0 0; border-left: 0; border-top: 1px solid var(--line); } .cred--wide .cred__item:first-child { padding-top: 0; border-top: 0; } }
+@media (max-width: 620px) { .creds { grid-template-columns: 1fr; } .cred { grid-column: 1 / -1; } }
 .strip .lg { transition: transform .2s, box-shadow .2s; box-shadow: var(--shadow); }
 .strip .lg:hover { transform: translateY(-2px); }
 .strip ul { gap: 12px clamp(10px, 2vw, 22px); }
@@ -1211,21 +1211,27 @@ html { scroll-padding-top: 96px; }
         </article>
 
         <article class="cred">
+          <div class="cred__issuer"><span class="lg lg--cred lg--udemy" role="img" aria-label="Udemy logo"></span><span class="cred__org">Udemy</span></div>
+          <div class="cred__list">
+            <div class="cred__item">
+              <h3>Advanced SQL: MySQL Data Analysis &amp; Business Intelligence</h3>
+              <p class="cred__meta"><a href="https://www.udemy.com/certificate/UC-398f536f-af22-40b5-864f-d278cdab86de/" target="_blank" rel="noopener">View credential ↗</a></p>
+            </div>
+          </div>
+        </article>
+
+        <article class="cred cred--wide">
           <div class="cred__issuer"><span class="lg lg--cred lg--nus" role="img" aria-label="National University of Singapore logo"></span><span class="cred__org">National University of Singapore</span></div>
           <div class="cred__list">
             <div class="cred__item">
               <h3>Python for Analytics</h3>
               <p class="cred__meta"><time datetime="2022-01">Jan 2022</time><a href="https://credentials.nus.edu.sg/bf83e63a-4933-4d0c-b08f-2daf56d4bbfa" target="_blank" rel="noopener">Verify credential ↗</a></p>
             </div>
-          </div>
-        </article>
-
-        <article class="cred">
-          <div class="cred__issuer"><span class="lg lg--cred lg--udemy" role="img" aria-label="Udemy logo"></span><span class="cred__org">Udemy</span></div>
-          <div class="cred__list">
             <div class="cred__item">
-              <h3>Advanced SQL: MySQL Data Analysis &amp; Business Intelligence</h3>
-              <p class="cred__meta"><a href="https://www.udemy.com/certificate/UC-398f536f-af22-40b5-864f-d278cdab86de/" target="_blank" rel="noopener">View credential ↗</a></p>
+              <h3>Data Structures &amp; Algorithms, Part I</h3>
+            </div>
+            <div class="cred__item">
+              <h3>Data Structures &amp; Algorithms, Part II</h3>
             </div>
           </div>
         </article>
