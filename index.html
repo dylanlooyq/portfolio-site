@@ -1139,7 +1139,8 @@ html { scroll-padding-top: 96px; }
   <dialog class="dialog" id="gameDialog" aria-labelledby="gameTitle">
     <form class="dialog__inner" id="gameForm" novalidate>
       <h2 id="gameTitle">Beat Beat City for <span id="gamePlatform">Windows</span></h2>
-      <p>Enter the access key I sent you and the download starts.</p>
+      <p id="gameIntro">Enter the access key I sent you and the download starts.</p>
+      <div class="dialog__widget" id="gameGoogle" hidden></div>
       <label class="field" for="gameKey">Access key</label>
       <input class="field__input" id="gameKey" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="BBC-XXXX-XXXX-XXXX-XXXX" maxlength="40">
       <p class="dialog__status" id="gameStatus" role="status" aria-live="polite"></p>
@@ -1158,7 +1159,8 @@ html { scroll-padding-top: 96px; }
 window.SITE_CONFIG = {
   turnstileSiteKey: "0x4AAAAAAFNWfM7vv__pNqx1",   // Cloudflare Turnstile *site* key
   cvEndpoint: "https://dylan-cv.dylanlyq.workers.dev/cv",
-  gameEndpoint: "https://dylan-cv.dylanlyq.workers.dev/game"
+  gameEndpoint: "https://dylan-cv.dylanlyq.workers.dev/game",
+  googleClientId: "58565878223-qqbgvqh3gs15s2erj07ns1515b3n8dbg.apps.googleusercontent.com"   // Google Sign-In (public)
 };
 </script>
   <script>
@@ -1287,36 +1289,71 @@ window.SITE_CONFIG = {
       document.getElementById('gamePlatform').textContent = PLATFORM_NAMES[gamePlatform];
       setGameStatus('');
       gameDialog.showModal();
+      setupGoogle();
       gameKey.focus();
     });
   });
 
   document.getElementById('gameCancel').addEventListener('click', function () { gameDialog.close(); });
 
-  document.getElementById('gameForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var key = gameKey.value.trim();
-    if (!key) { setGameStatus('Enter your access key.', true); gameKey.focus(); return; }
+  // Ask the Worker for a signed link. `credential` (a Google ID token) and `key` are both optional,
+  // but at least one is needed. The Worker's 403 messages are written for visitors, so show them.
+  function requestGameLink(key, credential) {
     gameSubmit.disabled = true;
-    setGameStatus('Checking your key…');
+    setGameStatus(credential ? 'Checking your Google account…' : 'Checking your key…');
+    var payload = { platform: gamePlatform };
+    if (key) payload.key = key;
+    if (credential) payload.credential = credential;
     fetch(cfg.gameEndpoint + '/unlock', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: key, platform: gamePlatform })
+      body: JSON.stringify(payload)
     }).then(function (r) {
-      if (r.status === 403) throw new Error('key');
+      if (r.status === 403) return r.text().then(function (msg) { throw new Error('denied:' + msg); });
       if (!r.ok) throw new Error(String(r.status));
       return r.json();
     }).then(function (data) {
-      setGameStatus('Key accepted. Your download is starting…');
+      setGameStatus('Access granted. Your download is starting…');
       window.location.assign(data.url);   // the Worker answers with an attachment, so the page stays put
       setTimeout(function () { if (gameDialog.open) gameDialog.close(); }, 2500);
     }).catch(function (err) {
-      setGameStatus(err.message === 'key'
-        ? 'That key isn’t valid, or it has expired. Check it and try again.'
+      setGameStatus(err.message.indexOf('denied:') === 0
+        ? err.message.slice(7) + (credential ? '' : ' Check it and try again.')
         : 'Couldn’t reach the server. Please try again, or email me.', true);
     }).then(function () { gameSubmit.disabled = false; });
+  }
+
+  document.getElementById('gameForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var key = gameKey.value.trim();
+    if (!key) { setGameStatus('Enter your access key, or sign in with Google.', true); gameKey.focus(); return; }
+    requestGameLink(key, null);
   });
+
+  // Optional Google sign-in: signing in links the key to the account, and from then on the account
+  // alone is enough. Skipped quietly if no client ID is configured or Google's script can't load.
+  var googleReady = null;
+  function setupGoogle() {
+    if (!cfg.googleClientId || googleReady) return;
+    var box = document.getElementById('gameGoogle');
+    googleReady = new Promise(function (resolve, reject) {
+      var sc = document.createElement('script');
+      sc.src = 'https://accounts.google.com/gsi/client';
+      sc.async = true;
+      sc.onload = resolve;
+      sc.onerror = reject;
+      document.head.appendChild(sc);
+    }).then(function () {
+      google.accounts.id.initialize({
+        client_id: cfg.googleClientId,
+        callback: function (resp) { requestGameLink(gameKey.value.trim(), resp.credential); }
+      });
+      google.accounts.id.renderButton(box, { type: 'standard', theme: 'outline', size: 'large', text: 'signin_with', width: 280 });
+      box.hidden = false;
+      document.getElementById('gameIntro').textContent =
+        'Sign in with Google to download. First time? Type the access key I sent you in the box below, then sign in, and I’ll link the key to your account. After that, signing in is all you need.';
+    }).catch(function () { googleReady = null; });
+  }
 
   // ── Screenshot galleries (IBM, Lazada): tabs, as progressive enhancement ──
   document.querySelectorAll('.gallery').forEach(function (gallery) {

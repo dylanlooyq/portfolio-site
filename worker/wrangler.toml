@@ -7,6 +7,8 @@ preview_urls = false
 [vars]
 # Comma-separated list of origins allowed to call the Worker (no trailing slash).
 ALLOWED_ORIGINS = "https://dylanloo.dev,http://localhost:8000"
+# Google Sign-In OAuth Client ID (public; used to check who an ID token was issued for).
+GOOGLE_CLIENT_ID = "58565878223-qqbgvqh3gs15s2erj07ns1515b3n8dbg.apps.googleusercontent.com"
 
 [[r2_buckets]]
 binding = "CV_BUCKET"

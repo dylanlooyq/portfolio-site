@@ -59,9 +59,25 @@ fetches the zip from R2 with a normal progress bar (and resume, if the connectio
 node keys.mjs new "Alice, Acme recruiter"            # works until you revoke it
 node keys.mjs new "Alice, Acme recruiter" --days 30  # expires on its own
 node keys.mjs revoke BBC-XXXX-XXXX-XXXX-XXXX
+node keys.mjs unlink BBC-XXXX-XXXX-XXXX-XXXX         # free a key from its Google account
 ```
 
 `new` prints the key to send. Use one key per person, so you can revoke one without affecting the rest.
+
+### Google sign-in
+
+The download dialog also offers "Sign in with Google" (`GOOGLE_CLIENT_ID` in `wrangler.toml`,
+`googleClientId` in `index.html`; both are public). The first time, the visitor types their key and signs
+in: the key is then **locked to that Google account**, and from then on signing in alone is enough.
+A locked key no longer works without that account, so it can't be passed around. Keys nobody has
+signed in with yet still work on their own, as before.
+
+- One Google account holds one key. Links are extra entries in `GAME_KEYS` (`bind:<KEY>` and
+  `acct:<id>`); the key entry itself is untouched, so expiry and `revoke` still apply (revoking also
+  cleans up the link).
+- If someone loses their Google account, `unlink` the key and they can lock it to a new one.
+- Add any other site origin (e.g. `http://localhost:8000`) to the OAuth client's authorized JavaScript
+  origins in Google Cloud Console to test the button there.
 
 - **Who has a key:** in the Cloudflare dashboard, open the `GAME_KEYS` KV namespace. It lists every
   key with the name you gave it.

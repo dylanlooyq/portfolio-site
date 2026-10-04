@@ -4,6 +4,7 @@
 //   node keys.mjs new "Alice, Acme recruiter"          # key that works until revoked
 //   node keys.mjs new "Alice, Acme recruiter" --days 30 # key that expires by itself
 //   node keys.mjs revoke BBC-XXXX-XXXX-XXXX-XXXX
+//   node keys.mjs unlink BBC-XXXX-XXXX-XXXX-XXXX        # free a key from its Google account
 //
 // Add --local to act on the `wrangler dev` simulator instead of the live namespace.
 
@@ -47,9 +48,31 @@ if (command === 'new' && arg) {
   const key = normalizeKey(arg);
   if (!key) fail('That does not look like a key.');
   wrangler(`delete "${key}"`);
+  unlink(key);
   console.log('\nRevoked. Links already issued stay valid for up to an hour; new unlocks fail within about a minute.');
+} else if (command === 'unlink' && arg) {
+  const key = normalizeKey(arg);
+  if (!key) fail('That does not look like a key.');
+  console.log(unlink(key) ? '\nUnlinked. The key can be locked to a Google account again on its next use.' : '\nThat key was not linked to a Google account.');
 } else {
-  fail('Usage:\n  node keys.mjs new "<who it is for>" [--days N] [--local]\n  node keys.mjs revoke <KEY> [--local]');
+  fail('Usage:\n  node keys.mjs new "<who it is for>" [--days N] [--local]\n  node keys.mjs revoke <KEY> [--local]\n  node keys.mjs unlink <KEY> [--local]   # let the key be linked to a different Google account');
+}
+
+// Remove the Google account link for a key (the `bind:` and `acct:` entries). Returns whether there was one.
+function unlink(key) {
+  let raw;
+  try {
+    raw = execSync(`npx wrangler kv key get "bind:${key}" --binding GAME_KEYS ${local ? '--local' : '--remote'}`, {
+      cwd: fileURLToPath(new URL('.', import.meta.url)),
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).toString();
+    const { sub } = JSON.parse(raw);
+    wrangler(`delete "bind:${key}"`);
+    if (sub) wrangler(`delete "acct:${sub}"`);
+    return true;
+  } catch {
+    return false; // no link (wrangler exits non-zero when the entry does not exist)
+  }
 }
 
 function fail(msg) {

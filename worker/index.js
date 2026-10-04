@@ -126,18 +126,81 @@ async function cv(request, env, { body, cors, fail, allowed }) {
   });
 }
 
-// Trade a valid access key for a signed download link. The key is checked here, once; the
-// big file is then fetched with a plain GET so the browser shows progress and can resume.
+// Verify a Google Sign-In ID token (RS256 JWT) and return { sub, email }, or null if it is
+// forged, expired, for another app, or the email is unverified.
+const GOOGLE_JWKS = 'https://www.googleapis.com/oauth2/v3/certs';
+const fromB64UrlText = (s) => new TextDecoder().decode(fromB64Url(s));
+
+async function verifyGoogle(env, credential) {
+  try {
+    const [h, p, s, extra] = credential.split('.');
+    if (extra !== undefined || !s) return null;
+    const header = JSON.parse(fromB64UrlText(h));
+    if (header.alg !== 'RS256') return null;
+
+    const jwks = await (await fetch(GOOGLE_JWKS, { cf: { cacheTtl: 3600, cacheEverything: true } })).json();
+    const jwk = jwks.keys.find((k) => k.kid === header.kid);
+    if (!jwk) return null;
+    const key = await crypto.subtle.importKey('jwk', jwk, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
+    if (!(await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, fromB64Url(s), enc.encode(`${h}.${p}`)))) return null;
+
+    const claims = JSON.parse(fromB64UrlText(p));
+    const issuerOk = claims.iss === 'https://accounts.google.com' || claims.iss === 'accounts.google.com';
+    if (!issuerOk || claims.aud !== env.GOOGLE_CLIENT_ID) return null;
+    if (!(claims.exp > Date.now() / 1000) || !claims.sub || claims.email_verified !== true) return null;
+    return { sub: String(claims.sub), email: String(claims.email || '') };
+  } catch {
+    return null;
+  }
+}
+
+// GAME_KEYS holds three kinds of entries (the prefixes contain ":", which a normalized key never does):
+//   <KEY>        -> who the key was issued to (written by keys.mjs; may expire)
+//   bind:<KEY>   -> { sub, email }  the Google account the key is locked to
+//   acct:<SUB>   -> <KEY>           lets that Google account sign in without typing the key
+// The key entry itself is never rewritten, so its expiry and revocation keep working: a link is
+// only honoured while the key entry still exists.
+
+// Trade a valid access key and/or Google sign-in for a signed download link. Credentials are
+// checked here, once; the big file is then fetched with a plain GET so the browser shows
+// progress and can resume.
 async function unlock(request, env, { body, url, cors, fail }) {
-  const { key, platform } = body ?? {};
-  if (typeof key !== 'string' || key.length > 100) return fail(400, 'Bad request');
+  const { key, platform, credential } = body ?? {};
+  if (key !== undefined && (typeof key !== 'string' || key.length > 100)) return fail(400, 'Bad request');
+  if (credential !== undefined && (typeof credential !== 'string' || credential.length > 4096)) return fail(400, 'Bad request');
+  if (!key && !credential) return fail(400, 'Bad request');
   if (typeof platform !== 'string' || !Object.hasOwn(GAME_FILES, platform)) return fail(400, 'Bad request');
 
-  const normalized = normalizeKey(key);
+  let google = null;
+  if (credential) {
+    google = await verifyGoogle(env, credential);
+    if (!google) return fail(403, 'Google sign-in failed. Please try again.');
+  }
+
+  let normalized = key ? normalizeKey(key) : '';
+  if (!normalized && google) {
+    // Returning visitor: find the key linked to this Google account.
+    normalized = (await env.GAME_KEYS.get(`acct:${google.sub}`)) || '';
+    if (!normalized) return fail(403, 'No key is linked to this Google account yet. Enter your access key once to link it.');
+  }
   const owner = normalized ? await env.GAME_KEYS.get(normalized) : null;
   if (owner === null) return fail(403, 'Invalid or expired key');
 
-  console.log(`beat-beat-city unlock: ${owner} (${platform})`); // visible with `wrangler tail`
+  const bound = await env.GAME_KEYS.get(`bind:${normalized}`, 'json');
+  if (bound) {
+    if (!google) return fail(403, 'This key is linked to a Google account. Sign in with Google to download.');
+    if (bound.sub !== google.sub) return fail(403, 'This key is linked to a different Google account.');
+  } else if (google) {
+    // First use with Google: lock the key to this account (one key per account).
+    const existing = await env.GAME_KEYS.get(`acct:${google.sub}`);
+    if (existing && existing !== normalized && (await env.GAME_KEYS.get(existing)) !== null) {
+      return fail(403, 'This Google account is already linked to a different key.');
+    }
+    await env.GAME_KEYS.put(`bind:${normalized}`, JSON.stringify({ sub: google.sub, email: google.email }));
+    await env.GAME_KEYS.put(`acct:${google.sub}`, normalized);
+  }
+
+  console.log(`beat-beat-city unlock: ${owner} (${platform})${google ? ` via google ${google.email}` : ''}`); // visible with `wrangler tail`
   const expires = Math.floor(Date.now() / 1000) + LINK_TTL_SECONDS;
   const token = await signLink(env.DOWNLOAD_SECRET, platform, expires);
   return new Response(JSON.stringify({ url: `${url.origin}/game/download?t=${encodeURIComponent(token)}` }), {
