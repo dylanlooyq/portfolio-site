@@ -66,18 +66,20 @@
     <div class="wrap nav__inner">
       <a class="nav__brand" href="/" aria-label="Dylan Loo, home">Dylan Loo<span>.</span></a>
       <nav class="nav__links" aria-label="Primary">
-        <a href="/">Home</a>
-        <a href="#quant">Quant</a>
-        <a href="#data-engineering">Data engineering</a>
-        <a href="#games">Games</a>
-        <a href="#utilities">Utilities</a>
+        <a href="/#work">Work</a>
+        <a href="/#experience">Experience</a>
+        <a href="/#education">Education</a>
+        <a href="/#certifications">Certifications</a>
+        <a href="/#beyond">Beyond work</a>
+        <a href="/projects" class="is-active" aria-current="page">Projects</a>
+        <a href="#contact">Contact</a>
       </nav>
       <div class="nav__actions">
         <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch theme" title="Switch theme">
           <svg class="icon icon--moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
           <svg class="icon icon--sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
         </button>
-        <a class="btn btn--ghost btn--sm" href="/">← Home</a>
+        <button class="btn btn--ghost btn--sm" type="button" data-cv>CV&nbsp;↓</button>
       </div>
     </div>
   </header>
@@ -205,6 +207,16 @@
     </div>
   </footer>
 
+  <dialog class="dialog" id="cvDialog" aria-labelledby="cvTitle">
+    <form method="dialog" class="dialog__inner">
+      <h2 id="cvTitle">Download my CV</h2>
+      <p>A quick check that you're human, then the PDF downloads.</p>
+      <div id="cvWidget" class="dialog__widget"></div>
+      <p class="dialog__status" id="cvStatus" role="status" aria-live="polite"></p>
+      <button class="btn btn--ghost btn--sm" value="close">Close</button>
+    </form>
+  </dialog>
+
   <dialog class="dialog dialog--video" id="videoDialog" aria-label="Beat Beat City gameplay">
     <div class="dialog__inner">
       <video class="dialog__video" id="gameplayVideo" controls playsinline preload="none" poster="assets/video/beatbeatcity-gameplay-poster.jpg"></video>
@@ -228,8 +240,10 @@
   </dialog>
 
   <script>
-// Public settings for the download gate (nothing secret belongs in this file).
+// Public settings for the download gates (nothing secret belongs in this file).
 window.SITE_CONFIG = {
+  turnstileSiteKey: "0x4AAAAAAFNWfM7vv__pNqx1",   // Cloudflare Turnstile *site* key
+  cvEndpoint: "https://dylan-cv.dylanlyq.workers.dev/cv",
   gameEndpoint: "https://dylan-cv.dylanlyq.workers.dev/game",
   googleClientId: "58565878223-qqbgvqh3gs15s2erj07ns1515b3n8dbg.apps.googleusercontent.com"   // Google Sign-In (public)
 };
@@ -260,7 +274,81 @@ window.SITE_CONFIG = {
     el.textContent = email;
   });
 
+  // ── CV download: Turnstile captcha, verified server-side by the Worker ──
   var cfg = window.SITE_CONFIG || {};
+  var gateReady = !!(cfg.turnstileSiteKey && cfg.cvEndpoint);
+  var dialog = document.getElementById('cvDialog');
+  var statusEl = document.getElementById('cvStatus');
+  var widgetId = null, tsPromise = null;
+
+  function setStatus(msg, isError) {
+    statusEl.textContent = msg || '';
+    statusEl.classList.toggle('is-error', !!isError);
+  }
+
+  function loadTurnstile() {
+    if (tsPromise) return tsPromise;
+    tsPromise = new Promise(function (resolve, reject) {
+      var sc = document.createElement('script');
+      sc.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      sc.async = true;
+      sc.onload = function () { resolve(window.turnstile); };
+      sc.onerror = function () { tsPromise = null; reject(new Error('load')); };
+      document.head.appendChild(sc);
+    });
+    return tsPromise;
+  }
+
+  function saveBlob(blob) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'Dylan-Loo-CV.pdf';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+  }
+
+  function onToken(token) {
+    setStatus('Verified. Preparing your download…');
+    fetch(cfg.cvEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: token })
+    }).then(function (r) {
+      if (!r.ok) throw new Error(String(r.status));
+      return r.blob();
+    }).then(function (blob) {
+      saveBlob(blob);
+      setStatus('Done. Check your downloads.');
+      setTimeout(function () { if (dialog.open) dialog.close(); }, 1200);
+    }).catch(function () {
+      setStatus('That didn’t work. Please try again, or email me for the CV.', true);
+      if (window.turnstile && widgetId !== null) window.turnstile.reset(widgetId);
+    });
+  }
+
+  document.querySelectorAll('[data-cv]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (!gateReady) {
+        location.href = 'mailto:' + email + '?subject=' + encodeURIComponent('CV request');
+        return;
+      }
+      setStatus('');
+      dialog.showModal();
+      loadTurnstile().then(function (ts) {
+        if (widgetId === null) {
+          widgetId = ts.render('#cvWidget', {
+            sitekey: cfg.turnstileSiteKey,
+            callback: onToken,
+            'error-callback': function () { setStatus('Captcha failed to load. Please try again.', true); }
+          });
+        } else {
+          ts.reset(widgetId);
+        }
+      }).catch(function () {
+        setStatus('Couldn’t load the captcha. Please email me for the CV.', true);
+      });
+    });
+  });
 
   // ── Beat Beat City gameplay video: loaded only when the dialog opens, stopped when it closes ──
   var videoDialog = document.getElementById('videoDialog');
@@ -366,14 +454,19 @@ window.SITE_CONFIG = {
     });
   }
 
-  // ── Highlight the nav link for the section in view ──
+  // ── Highlight the nav link for the section in view; this page's own link is lit otherwise ──
   var navLinks = document.querySelectorAll('.nav__links a');
+  var here = document.querySelector('.nav__links a[aria-current]');
   if ('IntersectionObserver' in window) {
     var navIo = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
-        if (!e.isIntersecting) return;
-        navLinks.forEach(function (a) { a.classList.toggle('is-active', a.getAttribute('href') === '#' + e.target.id); });
+        navLinks.forEach(function (a) {
+          if (a !== here && a.getAttribute('href') === '#' + e.target.id) a.classList.toggle('is-active', e.isIntersecting);
+        });
       });
+      var onSection = false;
+      navLinks.forEach(function (a) { if (a !== here && a.classList.contains('is-active')) onSection = true; });
+      if (here) here.classList.toggle('is-active', !onSection);
     }, { rootMargin: '-45% 0px -50% 0px' });
     navLinks.forEach(function (a) {
       var h = a.getAttribute('href');
