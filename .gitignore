@@ -7,3 +7,6 @@ worker/.dev.vars
 beat-beat-city-dist/
 .wrangler/
 assets/video/beatbeatcity-gameplay.mp4
+
+# Personal notes with credentials; never commit
+DYLAN.txt
