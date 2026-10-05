@@ -82,6 +82,20 @@
 .race__key { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
 .race__key i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; background: color-mix(in srgb, var(--muted) 45%, transparent); vertical-align: -1px; }
 .race__key i.is-new { background: var(--accent); }
+.race { position: relative; }
+.race__row { margin-inline: -8px; padding-inline: 8px; border-radius: 8px; cursor: default; transition: background .15s; outline: none; }
+.race__row:hover, .race__row.is-active { background: color-mix(in srgb, var(--accent) 9%, transparent); }
+.race__row:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
+.race__tip { position: absolute; left: 12px; right: 12px; z-index: 5; padding: 14px 16px 15px; background: var(--surface); border: 1px solid var(--accent); border-radius: 12px; box-shadow: var(--shadow), 0 16px 36px -12px rgba(0, 0, 0, .35); font-size: 13px; line-height: 1.5; color: var(--muted); pointer-events: none; opacity: 0; transform: translateY(4px); transition: opacity .15s, transform .15s; }
+.race__tip.is-on { opacity: 1; transform: none; }
+.race__tip[hidden] { display: none; }
+.race__tip h5 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0 0 6px; font: 500 16px/1.2 var(--serif); color: var(--ink); }
+.race__tip h5 small { font: 500 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--accent-ink); }
+.race__tip p { margin: 0; }
+.race__tip p + p { margin-top: 8px; }
+.race__tip b { display: block; margin-bottom: 1px; font: 500 10.5px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent-ink); }
+.race__tip .is-fast, .race__tip .is-slow { color: var(--ink); }
+@media (max-width: 520px) { .race__tip { left: 6px; right: 6px; font-size: 12.5px; } }
 @media (prefers-reduced-motion: no-preference) {
   .race.is-seen .race__bar { animation: race-grow .9s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i, 0) * 45ms); }
   @keyframes race-grow { from { transform: scaleX(0); } }
@@ -197,19 +211,20 @@
             </div>
 
             <figure class="race" aria-labelledby="raceTitle">
-              <figcaption class="race__title" id="raceTitle"><span><b>Time to reconcile 7M rows</b></span><span>median of 7 runs</span></figcaption>
+              <figcaption class="race__title" id="raceTitle"><span><b>Time to reconcile 7M rows</b></span><span>median of 7 runs · hover or tap a row</span></figcaption>
               <ol>
-                <li class="race__row race__row--best" style="--f:0.086;--i:0"><span class="race__name">Polars (Vectorized)</span><span class="race__track"><span class="race__bar"></span><span class="race__val">0.56 s</span></span></li>
-                <li class="race__row" style="--f:0.184;--i:1"><span class="race__name">PyArrow (Tuned batch size)</span><span class="race__track"><span class="race__bar"></span><span class="race__val">1.20 s</span></span></li>
-                <li class="race__row" style="--f:0.188;--i:2"><span class="race__name">PyArrow</span><span class="race__track"><span class="race__bar"></span><span class="race__val">1.23 s</span></span></li>
-                <li class="race__row race__row--new" style="--f:0.19;--i:3"><span class="race__name">Numba kernel</span><span class="race__track"><span class="race__bar"></span><span class="race__val">1.24 s</span></span></li>
-                <li class="race__row race__row--new" style="--f:0.202;--i:4"><span class="race__name">Row-group fingerprint</span><span class="race__track"><span class="race__bar"></span><span class="race__val">1.32 s</span></span></li>
-                <li class="race__row race__row--new" style="--f:0.294;--i:5"><span class="race__name">PyArrow (Parallel row groups)</span><span class="race__track"><span class="race__bar"></span><span class="race__val">1.92 s</span></span></li>
-                <li class="race__row" style="--f:0.302;--i:6"><span class="race__name">Polars (Streaming)</span><span class="race__track"><span class="race__bar"></span><span class="race__val">1.97 s</span></span></li>
-                <li class="race__row" style="--f:0.394;--i:7"><span class="race__name">DuckDB</span><span class="race__track"><span class="race__bar"></span><span class="race__val">2.57 s</span></span></li>
-                <li class="race__row" style="--f:0.64;--i:8"><span class="race__name">Polars</span><span class="race__track"><span class="race__bar"></span><span class="race__val">4.18 s</span></span></li>
-                <li class="race__row" style="--f:1;--i:9"><span class="race__name">Pandas</span><span class="race__track"><span class="race__bar"></span><span class="race__val">6.53 s</span></span></li>
+                <li class="race__row race__row--best" style="--f:0.086;--i:0" tabindex="0" data-what="Reads both files eagerly and compares them with pure Polars expressions. No Python loop runs at all." data-why="Fastest: multi-threaded, SIMD-friendly execution and no per-row Python. The price is memory, because it holds both tables plus a boolean frame the same shape (2.4 GB)."><span class="race__name">Polars (Vectorized)</span><span class="race__track"><span class="race__bar"></span><span class="race__val">0.56 s</span></span></li>
+                <li class="race__row" style="--f:0.184;--i:1" tabindex="0" data-what="Walks both files in lock-step record batches with Arrow compute kernels. The batch size was picked by a sweep." data-why="Native kernels, and each batch stays cache-resident. Only one batch is held at a time, so memory stays at 516 MB, about 4.8× less than the fastest method."><span class="race__name">PyArrow (Tuned batch size)</span><span class="race__track"><span class="race__bar"></span><span class="race__val">1.20 s</span></span></li>
+                <li class="race__row" style="--f:0.188;--i:2" tabindex="0" data-what="The same Arrow comparison, but each file is read as one big batch." data-why="Just as quick as the tuned version, but peak memory grows with the file (1.4 GB), so it stops finishing before 56M rows."><span class="race__name">PyArrow</span><span class="race__track"><span class="race__bar"></span><span class="race__val">1.23 s</span></span></li>
+                <li class="race__row race__row--new" style="--f:0.19;--i:3" tabindex="0" data-what="A hand-written, JIT-compiled loop over the raw Arrow buffers, parallelised across rows. New in this study." data-why="Hand-written, yet it only matches 36 lines of PyArrow. It needs a one-off compile (3.3 s cold), 67 lines of code, and supports only int64 and string columns."><span class="race__name">Numba kernel</span><span class="race__track"><span class="race__bar"></span><span class="race__val">1.24 s</span></span></li>
+                <li class="race__row race__row--new" style="--f:0.202;--i:4" tabindex="0" data-what="Compares the raw compressed bytes of each Parquet row group and only decodes the groups that differ. New in this study." data-why="Here the 200 changes are scattered across all 28 row groups, so there is little to skip. On identical files it takes 68 ms, and it uses the least memory of all (311 MB)."><span class="race__name">Row-group fingerprint</span><span class="race__track"><span class="race__bar"></span><span class="race__val">1.32 s</span></span></li>
+                <li class="race__row race__row--new" style="--f:0.294;--i:5" tabindex="0" data-what="Splits the work by Parquet row group across a pool of worker processes. New in this study." data-why="Slower at 7M rows: every worker pays process start-up and its own imports, using 16 CPU-seconds (3.3× the fastest). It pays off at scale: it is the fastest method that finishes at 56M rows."><span class="race__name">PyArrow (Parallel row groups)</span><span class="race__track"><span class="race__bar"></span><span class="race__val">1.92 s</span></span></li>
+                <li class="race__row" style="--f:0.302;--i:6" tabindex="0" data-what="Lazily scans both files, hashes every row to 64 bits and compares the two hash streams with a streaming join." data-why="Built for bounded memory, so it still finishes at 56M rows. At 7M the hashing and the join add overhead. A hash match is also probabilistic: a collision could hide a break."><span class="race__name">Polars (Streaming)</span><span class="race__track"><span class="race__bar"></span><span class="race__val">1.97 s</span></span></li>
+                <li class="race__row" style="--f:0.394;--i:7" tabindex="0" data-what="Expresses the comparison as SQL: number the rows of each file, join on row number, average a null-safe equality across every column." data-why="Multi-threaded and null-safe, but the row-number join is the overhead: it costs memory (1.4 GB) and relies on the engine returning rows in file order."><span class="race__name">DuckDB</span><span class="race__track"><span class="race__bar"></span><span class="race__val">2.57 s</span></span></li>
+                <li class="race__row" style="--f:0.64;--i:8" tabindex="0" data-what="Reads both files eagerly, compares them cell by cell, then counts the all-true rows by iterating Python tuples." data-why="The fast reader and comparison are undone by turning every row into a Python tuple. It also has the largest footprint of any method (3.4 GB)."><span class="race__name">Polars</span><span class="race__track"><span class="race__bar"></span><span class="race__val">4.18 s</span></span></li>
+                <li class="race__row" style="--f:1;--i:9" tabindex="0" data-what="Loads both files into DataFrames and tests every cell with (df1 == df2).all(axis=1). The approach most analysts write first." data-why="Slowest: strings are held as Python objects and compared cell by cell on about two cores. In its favour, it is the shortest code at 5 lines."><span class="race__name">Pandas</span><span class="race__track"><span class="race__bar"></span><span class="race__val">6.53 s</span></span></li>
               </ol>
+              <div class="race__tip" id="raceTip" role="tooltip" hidden></div>
               <p class="race__key"><span><i></i>Original methods</span><span><i class="is-new"></i>New in this study</span></p>
             </figure>
           </div>
@@ -666,6 +681,65 @@ window.SITE_CONFIG = {
       seen.disconnect();
     }, { threshold: 0.3 });
     seen.observe(race);
+  }
+
+  // Tooltip on each bar row: what the method is, and why it is fast or slow.
+  // Hover, keyboard focus and tap all work; Escape or tapping elsewhere dismisses.
+  var tip = document.getElementById('raceTip');
+  if (race && tip) {
+    var rows = Array.prototype.slice.call(race.querySelectorAll('.race__row[data-why]'));
+    var active = null;
+    var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+
+    var hide = function () {
+      if (!active) return;
+      active.classList.remove('is-active');
+      active.removeAttribute('aria-describedby');
+      tip.classList.remove('is-on');
+      tip.hidden = true;
+      active = null;
+    };
+    var show = function (row) {
+      if (active === row) return;
+      hide();
+      active = row;
+      var name = row.querySelector('.race__name').textContent;
+      var isNew = row.classList.contains('race__row--new');
+      var time = row.querySelector('.race__val').textContent;
+      var rank = rows.indexOf(row);
+      tip.innerHTML =
+        '<h5>' + esc(name) + ' <small>' + esc(time) + (isNew ? ' · new' : '') + '</small></h5>' +
+        '<p><b>What it is</b>' + esc(row.getAttribute('data-what')) + '</p>' +
+        '<p><b>' + (rank <= 2 ? 'Why it is fast' : rank >= 7 ? 'Why it is slow' : 'Why it lands mid-pack') + '</b>' + esc(row.getAttribute('data-why')) + '</p>';
+      tip.hidden = false;
+      // Rows in the lower half open the tooltip upwards so it stays inside the chart card
+      var gap = 8, h = tip.offsetHeight;
+      var top = rank >= 5 ? row.offsetTop - h - gap : row.offsetTop + row.offsetHeight + gap;
+      tip.style.top = Math.max(4, top) + 'px';
+      row.classList.add('is-active');
+      row.setAttribute('aria-describedby', 'raceTip');
+      void tip.offsetWidth; // flush layout so the fade-in transition runs from the hidden state
+      tip.classList.add('is-on');
+    };
+
+    rows.forEach(function (row) {
+      // A mouse gets the tooltip on hover; touch and pen taps toggle it instead
+      // (a tap also fires an emulated mouseenter, which would open then close it)
+      var tapped = false;
+      row.addEventListener('pointerenter', function (e) { tapped = e.pointerType !== 'mouse'; });
+      row.addEventListener('pointerdown', function (e) { tapped = e.pointerType !== 'mouse'; });
+      row.addEventListener('mouseenter', function () { if (!tapped) show(row); });
+      row.addEventListener('mouseleave', function () { if (!tapped) hide(); });
+      row.addEventListener('focus', function () { if (row.matches(':focus-visible')) show(row); });
+      row.addEventListener('blur', hide);
+      row.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (!tapped) return;
+        if (active === row) hide(); else show(row);
+      });
+    });
+    document.addEventListener('click', hide);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') hide(); });
   }
 })();
   </script>
