@@ -43,11 +43,6 @@
 .card__more a:hover { color: var(--accent-ink); text-decoration-color: var(--accent); }
 .card__stack { font: 400 12px/1.6 var(--mono); color: var(--muted); margin-top: 12px; }
 
-/* Game card: the art is dark in both themes, so the stage uses fixed colours */
-.card--game { padding: 0; overflow: hidden; }
-.card--game .project__stage { min-height: clamp(160px, 22vw, 220px); padding: 24px; overflow: hidden; }
-.card--game .project__logo { width: min(280px, 80%); }
-.card--game .card__text { padding: 26px; }
 .cards--single { grid-template-columns: minmax(0, 1fr); }
 .card--soon { display: grid; place-items: center; text-align: center; min-height: 120px; border-style: dashed; background: transparent; }
 .card--soon .card__tag { margin-bottom: 8px; }
@@ -134,20 +129,31 @@
         <p class="eyebrow">03 · Games</p>
         <h2>A rhythm game, built for fun.</h2>
       </header>
-      <div class="cards cards--single">
-        <article class="card card--game">
-          <div class="project__stage">
-            <img class="project__bg" src="/assets/beat-beat-city-menu.webp" alt="" loading="lazy">
-            <img class="project__logo" src="/assets/beat-beat-city-logo.webp" alt="Beat Beat City" loading="lazy">
-          </div>
-          <div class="card__text">
+      <article class="project" id="beatbeatcity">
+        <div class="project__stage">
+          <img class="project__bg" src="/assets/beat-beat-city-menu.webp" width="1440" height="810" alt="" loading="lazy" decoding="async">
+          <img class="project__logo" src="/assets/beat-beat-city-logo.webp" width="800" height="437" alt="Beat Beat City" loading="lazy" decoding="async">
+        </div>
+        <div class="project__body">
+          <div>
             <p class="card__tag">Personal project · Game</p>
             <h3>Beat Beat City</h3>
             <p>A neon-lit rhythm game I built in my spare time. It's invite-only for now: the Mac and Windows downloads unlock with a key from me.</p>
-            <p class="card__more"><a href="/#beatbeatcity">Watch gameplay and download&nbsp;→</a></p>
+            <div class="project__buttons project__watch">
+              <button class="btn btn--ghost" type="button" id="watchGameplay"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Watch gameplay</button>
+            </div>
           </div>
-        </article>
-      </div>
+          <div class="project__get">
+            <h4>Download</h4>
+            <div class="project__buttons">
+              <button class="btn btn--primary" type="button" data-game="windows"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-13.051-1.8"/></svg>Windows&nbsp;↓</button>
+              <button class="btn btn--primary" type="button" data-game="mac"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>macOS&nbsp;↓</button>
+            </div>
+            <p class="project__note">Current version: <b>0.3.2</b> (Demo)</p>
+            <p class="project__note">Need a key? <a href="#contact" data-key-request>Email me</a> and I'll send you one.</p>
+          </div>
+        </div>
+      </article>
     </section>
 
     <!-- ───────── Utilities ───────── -->
@@ -199,6 +205,35 @@
     </div>
   </footer>
 
+  <dialog class="dialog dialog--video" id="videoDialog" aria-label="Beat Beat City gameplay">
+    <div class="dialog__inner">
+      <video class="dialog__video" id="gameplayVideo" controls playsinline preload="none" poster="assets/video/beatbeatcity-gameplay-poster.jpg"></video>
+      <div class="dialog__actions"><button class="btn btn--ghost" type="button" id="videoClose">Close</button></div>
+    </div>
+  </dialog>
+
+  <dialog class="dialog" id="gameDialog" aria-labelledby="gameTitle">
+    <form class="dialog__inner" id="gameForm" novalidate>
+      <h2 id="gameTitle">Beat Beat City for <span id="gamePlatform">Windows</span></h2>
+      <p id="gameIntro">Enter the access key I sent you, then sign in with Google. The first time, your key is linked to your Google account, and from then on both are needed to download.</p>
+      <label class="field" for="gameKey">Access key</label>
+      <input class="field__input" id="gameKey" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="BBC-XXXX-XXXX-XXXX-XXXX" maxlength="40">
+      <div class="dialog__widget" id="gameGoogle"></div>
+      <p class="dialog__status" id="gameStatus" role="status" aria-live="polite"></p>
+      <div class="dialog__actions">
+        <button class="btn btn--ghost" type="button" id="gameCancel">Cancel</button>
+      </div>
+      <p class="dialog__hint">No key? <a href="#contact" data-key-request>Email me</a> and I'll send one.</p>
+    </form>
+  </dialog>
+
+  <script>
+// Public settings for the download gate (nothing secret belongs in this file).
+window.SITE_CONFIG = {
+  gameEndpoint: "https://dylan-cv.dylanlyq.workers.dev/game",
+  googleClientId: "58565878223-qqbgvqh3gs15s2erj07ns1515b3n8dbg.apps.googleusercontent.com"   // Google Sign-In (public)
+};
+  </script>
   <script>
 (function () {
   var root = document.documentElement;
@@ -225,6 +260,112 @@
     el.textContent = email;
   });
 
+  var cfg = window.SITE_CONFIG || {};
+
+  // ── Beat Beat City gameplay video: loaded only when the dialog opens, stopped when it closes ──
+  var videoDialog = document.getElementById('videoDialog');
+  var gameplayVideo = document.getElementById('gameplayVideo');
+  document.getElementById('watchGameplay').addEventListener('click', function () {
+    if (!gameplayVideo.getAttribute('src')) gameplayVideo.src = 'assets/video/beatbeatcity-gameplay-web.mp4';
+    videoDialog.showModal();
+    gameplayVideo.play().catch(function () {});   // autoplay can be blocked; the controls still work
+  });
+  document.getElementById('videoClose').addEventListener('click', function () { videoDialog.close(); });
+  videoDialog.addEventListener('close', function () { gameplayVideo.pause(); });
+  videoDialog.addEventListener('click', function (e) { if (e.target === videoDialog) videoDialog.close(); });   // click the backdrop
+
+  // ── Beat Beat City: access key → signed download link from the Worker ──
+  var gameDialog = document.getElementById('gameDialog');
+  var gameKey = document.getElementById('gameKey');
+  var gameStatus = document.getElementById('gameStatus');
+  var gameBusy = false;
+  var gamePlatform = 'windows';
+  var PLATFORM_NAMES = { mac: 'macOS', windows: 'Windows' };
+  var keyRequest = 'mailto:' + email + '?subject=' + encodeURIComponent('Beat Beat City access');
+
+  document.querySelectorAll('[data-key-request]').forEach(function (a) { a.href = keyRequest; });
+
+  function setGameStatus(msg, isError) {
+    gameStatus.textContent = msg || '';
+    gameStatus.classList.toggle('is-error', !!isError);
+  }
+
+  document.querySelectorAll('[data-game]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (!cfg.gameEndpoint || !cfg.googleClientId) { location.href = keyRequest; return; }
+      gamePlatform = btn.getAttribute('data-game');
+      document.getElementById('gamePlatform').textContent = PLATFORM_NAMES[gamePlatform];
+      setGameStatus('');
+      gameDialog.showModal();
+      setupGoogle();
+      gameKey.focus();
+    });
+  });
+
+  document.getElementById('gameCancel').addEventListener('click', function () { gameDialog.close(); });
+
+  // Ask the Worker for a signed link. It needs the access key and a Google ID token (`credential`).
+  // The Worker's 403 messages are written for visitors, so show them.
+  function requestGameLink(key, credential) {
+    if (gameBusy) return;
+    gameBusy = true;
+    setGameStatus('Checking your key and Google account…');
+    var payload = { platform: gamePlatform, key: key, credential: credential };
+    fetch(cfg.gameEndpoint + '/unlock', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function (r) {
+      if (r.status === 403) return r.text().then(function (msg) { throw new Error('denied:' + msg); });
+      if (!r.ok) throw new Error(String(r.status));
+      return r.json();
+    }).then(function (data) {
+      setGameStatus('Access granted. Your download is starting…');
+      window.location.assign(data.url);   // the Worker answers with an attachment, so the page stays put
+      setTimeout(function () { if (gameDialog.open) gameDialog.close(); }, 2500);
+    }).catch(function (err) {
+      setGameStatus(err.message.indexOf('denied:') === 0
+        ? err.message.slice(7)
+        : 'Couldn’t reach the server. Please try again, or email me.', true);
+    }).then(function () { gameBusy = false; });
+  }
+
+  document.getElementById('gameForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var key = gameKey.value.trim();
+    setGameStatus(gameKey.value.trim() ? 'Now sign in with Google below.' : 'Enter your access key first.', true);
+    if (!gameKey.value.trim()) gameKey.focus();
+  });
+
+  // Google sign-in is the submit step: the key and the signed-in account are both required, and the
+  // first use links the key to that account. Load Google's script lazily, when the dialog first opens.
+  var googleReady = null;
+  function setupGoogle() {
+    if (googleReady) return;
+    var box = document.getElementById('gameGoogle');
+    googleReady = new Promise(function (resolve, reject) {
+      var sc = document.createElement('script');
+      sc.src = 'https://accounts.google.com/gsi/client';
+      sc.async = true;
+      sc.onload = resolve;
+      sc.onerror = reject;
+      document.head.appendChild(sc);
+    }).then(function () {
+      google.accounts.id.initialize({
+        client_id: cfg.googleClientId,
+        callback: function (resp) {
+          var key = gameKey.value.trim();
+          if (!key) { setGameStatus('Enter your access key first, then sign in again.', true); gameKey.focus(); return; }
+          requestGameLink(key, resp.credential);
+        }
+      });
+      google.accounts.id.renderButton(box, { type: 'standard', theme: 'outline', size: 'large', text: 'signin_with', width: 280 });
+    }).catch(function () {
+      googleReady = null;
+      setGameStatus('Couldn’t load Google sign-in. Reload the page, or email me.', true);
+    });
+  }
+
   // ── Highlight the nav link for the section in view ──
   var navLinks = document.querySelectorAll('.nav__links a');
   if ('IntersectionObserver' in window) {
@@ -242,7 +383,7 @@
   }
 
   // ── Reveal-on-scroll ──
-  var targets = document.querySelectorAll('.card');
+  var targets = document.querySelectorAll('.card, .project');
   if (reduce || !('IntersectionObserver' in window)) return;
   targets.forEach(function (el) { el.classList.add('reveal'); });
   var io = new IntersectionObserver(function (entries) {
