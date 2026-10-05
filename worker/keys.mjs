@@ -29,7 +29,7 @@ const [command, arg] = args;
 
 function wrangler(sub) {
   // Every argument is double-quoted so this works in cmd, PowerShell and sh alike.
-  const cmd = `npx wrangler kv key ${sub} --binding GAME_KEYS ${local ? '--local' : '--remote'}`;
+  const cmd = `npx wrangler kv key ${sub} --config wrangler.toml --binding GAME_KEYS ${local ? '--local' : '--remote'}`;
   execSync(cmd, { cwd: fileURLToPath(new URL('.', import.meta.url)), stdio: 'inherit' });
 }
 
@@ -62,7 +62,7 @@ if (command === 'new' && arg) {
 function unlink(key) {
   let raw;
   try {
-    raw = execSync(`npx wrangler kv key get "bind:${key}" --binding GAME_KEYS ${local ? '--local' : '--remote'}`, {
+    raw = execSync(`npx wrangler kv key get "bind:${key}" --config wrangler.toml --binding GAME_KEYS ${local ? '--local' : '--remote'}`, {
       cwd: fileURLToPath(new URL('.', import.meta.url)),
       stdio: ['ignore', 'pipe', 'ignore'],
     }).toString();
