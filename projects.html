@@ -59,28 +59,27 @@
 @media (max-width: 920px) { .card--feature { grid-template-columns: minmax(0, 1fr); } }
 
 /* ── Data engineering: Accelerating Tabular Reconciliation ── */
-.recon { position: relative; isolation: isolate; overflow: hidden; padding: clamp(22px, 4vw, 44px); background-image: radial-gradient(ellipse 60% 50% at 100% 0%, var(--glow2), transparent 70%), linear-gradient(to bottom, color-mix(in srgb, var(--accent) 5%, var(--surface)), var(--surface) 40%); }
+.recon { position: relative; isolation: isolate; overflow: hidden; padding: clamp(20px, 3vw, 32px); background-image: radial-gradient(ellipse 60% 50% at 100% 0%, var(--glow2), transparent 70%), linear-gradient(to bottom, color-mix(in srgb, var(--accent) 5%, var(--surface)), var(--surface) 40%); }
 .recon::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--glow2) 70%, transparent); }
 .recon:hover { transform: none; box-shadow: none; }
 .recon__top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: start; }
-.recon h3 { font-size: clamp(28px, 3.8vw, 42px); line-height: 1.1; margin-bottom: 8px; }
-.recon__sub { font: italic 400 clamp(16px, 1.7vw, 19px)/1.4 var(--serif); color: var(--accent-ink); margin-bottom: 18px; }
+.recon h3 { font-size: clamp(26px, 3.2vw, 36px); line-height: 1.1; margin-bottom: 8px; }
+.recon__sub { font: italic 400 clamp(15px, 1.5vw, 17px)/1.4 var(--serif); color: var(--accent-ink); margin-bottom: 14px; }
 .recon__intro > p:not(.card__tag):not(.recon__sub) { color: var(--muted); max-width: 60ch; }
-.recon__intro p + p { margin-top: 12px; }
 .recon__intro strong { color: var(--ink); }
-.recon__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.recon__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
 
-.race { margin: 0; padding: 20px 22px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+.race { margin: 0; padding: 16px 20px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
 .race__title { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; margin-bottom: 14px; font: 500 11.5px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .race__title b { color: var(--ink); font-weight: 500; }
-.race__row { display: grid; grid-template-columns: minmax(0, 14.5em) minmax(0, 1fr); align-items: center; gap: 12px; padding-block: 4px; font-size: 13px; color: var(--ink); }
+.race__row { display: grid; grid-template-columns: minmax(0, 14.5em) minmax(0, 1fr); align-items: center; gap: 12px; padding-block: 3px; font-size: 13px; color: var(--ink); }
 .race__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .race__track { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .race__bar { display: block; flex: none; height: 14px; width: calc((100% - 4.6em) * var(--f)); min-width: 4px; border-radius: 4px; background: color-mix(in srgb, var(--muted) 45%, transparent); transform-origin: left; }
 .race__row--new .race__bar { background: linear-gradient(90deg, var(--accent), var(--accent-ink)); }
 .race__row--best .race__name { font-weight: 600; }
 .race__val { font: 400 12px/1 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.race__key { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.race__key { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
 .race__key i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; background: color-mix(in srgb, var(--muted) 45%, transparent); vertical-align: -1px; }
 .race__key i.is-new { background: var(--accent); }
 @media (prefers-reduced-motion: no-preference) {
@@ -88,23 +87,27 @@
   @keyframes race-grow { from { transform: scaleX(0); } }
 }
 
-.recon .stats { margin-block: clamp(24px, 4vw, 40px); }
+.recon .stats { margin-block: 22px; padding-block: 16px; }
 .recon .stat__l { max-width: 22ch; }
-.recon__cols { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); }
-.recon__cols h4 { font: 500 11.5px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent-ink); margin-bottom: 16px; }
-.recon__cols strong { color: var(--ink); }
-.recon__facts li { font-size: 14.5px; color: var(--muted); margin-bottom: 12px; padding-left: 16px; position: relative; }
-.recon__facts li::before { content: ""; position: absolute; left: 0; top: .72em; width: 6px; height: 1.5px; background: var(--accent); }
-.recon__facts li:last-child { margin-bottom: 0; }
-.recon__stack { margin-top: 22px; font: 400 12px/1.6 var(--mono); color: var(--muted); }
-.recon__caveat { margin: 18px 0 0; font-size: 13.5px; color: var(--muted); }
+.recon__finds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px clamp(20px, 3vw, 36px); }
+.recon__finds li { font-size: 14px; line-height: 1.5; color: var(--muted); padding-left: 16px; position: relative; }
+.recon__finds li::before { content: ""; position: absolute; left: 0; top: .72em; width: 6px; height: 1.5px; background: var(--accent); }
+.recon__finds strong { color: var(--ink); }
+.recon__caveat { margin: 14px 0 0; font-size: 13.5px; color: var(--muted); }
 .recon__caveat a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
 .recon__caveat a:hover { color: var(--accent-ink); text-decoration-color: var(--accent); }
 
-.recon .gallery__title { font: 500 clamp(20px, 2.4vw, 26px)/1.2 var(--serif); letter-spacing: 0; text-transform: none; color: var(--ink); margin-bottom: 6px; }
+.recon__more { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+.recon__more > summary { display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px; border: 1px solid var(--line); border-radius: 999px; font: 500 13px/1 var(--sans); color: var(--ink); cursor: pointer; list-style: none; transition: border-color .15s; }
+.recon__more > summary::-webkit-details-marker { display: none; }
+.recon__more > summary:hover { border-color: var(--accent); }
+.recon__more > summary span { font: 400 11.5px/1 var(--mono); color: var(--muted); }
+.recon__more > summary::after { content: "+"; font: 400 18px/1 var(--mono); color: var(--accent-ink); }
+.recon__more[open] > summary::after { content: "\2212"; }
+.recon__more .gallery { margin-top: 16px; }
 .recon .panel { background: var(--surface); }
 .recon .panel img { display: block; width: 100%; height: auto; }
-.recon .th-dark { display: none; }
+.recon .panel img.th-dark { display: none; }
 :root[data-theme="dark"] .recon .th-light { display: none; }
 :root[data-theme="dark"] .recon .th-dark { display: block; }
 @media (prefers-color-scheme: dark) {
@@ -112,7 +115,7 @@
   :root:not([data-theme="light"]) .recon .th-dark { display: block; }
 }
 @media (max-width: 920px) {
-  .recon__top, .recon__cols { grid-template-columns: minmax(0, 1fr); }
+  .recon__top, .recon__finds { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 520px) {
   .race { padding-inline: 16px; }
@@ -186,8 +189,7 @@
               <p class="card__tag">Research project · Benchmark study</p>
               <h3>Accelerating Tabular Reconciliation</h3>
               <p class="recon__sub">Ten ways to compare two huge tables, measured on time, memory, CPU and code.</p>
-              <p>A month-end reconciliation sounds simple until the files reach millions of rows and the spreadsheet stops opening. I treated it as a research question: for a row-by-row comparison of two large tables, <strong>which execution strategy gives the shortest time to an answer, and what does it cost?</strong></p>
-              <p>I benchmarked <strong>ten methods</strong> (seven from an earlier study, three new) on 7M-row Parquet files, then scaled up to 56M. Each run is a fresh process, and every answer is checked against ground truth recorded by the data generator.</p>
+              <p>Which way of reconciling two large tables is fastest, and what does it cost? I benchmarked <strong>ten methods</strong> on 7M-row Parquet files, scaled to 56M, and checked every answer against ground truth.</p>
               <div class="recon__actions">
                 <a class="btn btn--primary" href="/reports/tabular-reconciliation/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6zm8 1.5V8h4.5zM9 12h8v1.5H9zm0 3.5h8V17H9z"/></svg>Read the report&nbsp;↗</a>
                 <a class="btn btn--ghost" href="https://github.com/dylanlooyq/data_reconciliation" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.54-3.88-1.54-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.73-1.54-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.77.11 3.06.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5"/></svg>View on GitHub&nbsp;↗</a>
@@ -219,36 +221,17 @@
             <div class="stat"><span class="stat__n">68 ms</span><span class="stat__l">to confirm two identical 7M-row files</span></div>
           </div>
 
-          <div class="recon__cols">
-            <div>
-              <h4>What I found</h4>
-              <ul class="recon__facts">
-                <li><strong>Fastest is not the cheapest.</strong> Polars (Vectorized) took 0.56 s but peaked at 2.4 GB. Tuned PyArrow took 1.2 s with 4.8× less memory.</li>
-                <li><strong>Memory decides what scales.</strong> At 56M rows the winner changed: parallel PyArrow finished in 7.8 s while the 7M-row champion could not run at all.</li>
-                <li><strong>Skipping beats speeding up.</strong> Comparing raw Parquet row-group bytes and decoding only what differs is near-instant on mostly unchanged files, and gains nothing once every group is touched.</li>
-                <li><strong>Parallelism has a price.</strong> The parallel method kept 8.4 cores busy for 3.3× the CPU of the fastest, and was slower at 7M rows.</li>
-                <li><strong>Hand-written is not automatically faster.</strong> A 67-line Numba kernel matched a 36-line PyArrow version.</li>
-              </ul>
-            </div>
-            <div>
-              <h4>How it was run</h4>
-              <ul class="recon__facts">
-                <li><strong>Workload:</strong> two 7M-row, 12-column Parquet files with 200 altered rows, scaled from 1M to 56M.</li>
-                <li><strong>Fair fight:</strong> a fresh process per run, seven interleaved repeats, and a memory guard that records what cannot finish.</li>
-                <li><strong>Correct by construction:</strong> every method is tested against the changed rows the generator recorded.</li>
-              </ul>
-              <p class="recon__stack">Python · Polars · PyArrow · DuckDB · Pandas · Numba · pytest</p>
-            </div>
-          </div>
-          <p class="recon__caveat">Synthetic data on one machine, comparing row <em>i</em> against row <em>i</em>. Section 8 of the <a href="/reports/tabular-reconciliation/" target="_blank" rel="noopener">report</a> spells out what that does and doesn't show.</p>
+          <ul class="recon__finds">
+            <li><strong>Fastest is not the cheapest.</strong> Polars (Vectorized) took 0.56 s but peaked at 2.4 GB. Tuned PyArrow took 1.2 s with 4.8× less memory.</li>
+            <li><strong>Memory decides what scales.</strong> At 56M rows only four methods finish, and the winner changes.</li>
+            <li><strong>Skipping beats speeding up.</strong> Comparing raw Parquet row-group bytes is near-instant on mostly unchanged files, and gains nothing once every group differs.</li>
+          </ul>
+          <p class="recon__caveat">Synthetic data, one machine. Section 8 of the <a href="/reports/tabular-reconciliation/" target="_blank" rel="noopener">report</a> covers the limitations.</p>
 
-          <div class="gallery" id="reconGallery">
-            <div class="gallery__head">
-              <p class="eyebrow">Visualisations</p>
-              <h4 class="gallery__title">Four views of the results</h4>
-              <p>Figures from the report, in light and dark to match the site. The full report has the data tables behind each one.</p>
-            </div>
-            <div class="tabs" role="tablist" aria-label="Benchmark visualisations">
+          <details class="recon__more">
+            <summary>View visualisations <span>4 figures</span></summary>
+            <div class="gallery" id="reconGallery">
+              <div class="tabs" role="tablist" aria-label="Benchmark visualisations">
               <button type="button" role="tab" id="rc-tab-1" aria-controls="rc-panel-1" aria-selected="true">Speed vs memory</button>
               <button type="button" role="tab" id="rc-tab-2" aria-controls="rc-panel-2" aria-selected="false" tabindex="-1">Scaling</button>
               <button type="button" role="tab" id="rc-tab-3" aria-controls="rc-panel-3" aria-selected="false" tabindex="-1">Scorecard</button>
@@ -277,7 +260,8 @@
                 <figcaption><strong>Fingerprinting:</strong> Same number of changed rows each time; only how widely they are spread across row groups changes.</figcaption>
               </figure>
             </div>
-          </div>
+            </div>
+          </details>
         </article>
       </div>
     </section>
