@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Projects — Dylan Loo</title>
+  <meta name="description" content="Side projects by Dylan Loo: quant research, data engineering, games and small utilities.">
+  <meta name="theme-color" content="#f6f3ec" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/assets/favicon.png" type="image/png" sizes="512x512">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <meta property="og:title" content="Projects — Dylan Loo">
+  <meta property="og:description" content="Quant research, data engineering, games and small utilities.">
+  <meta property="og:type" content="website">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Apply the saved theme before first paint to avoid a flash -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/site.css">
+  <style>
+/* Page-specific bits; everything else comes from site.css */
+.page-head { padding-block: clamp(48px, 9vw, 104px) clamp(32px, 5vw, 56px); }
+.page-head h1 { font-size: clamp(38px, 6vw, 68px); max-width: 16ch; margin-bottom: 20px; }
+.page-head h1 em { font-style: italic; background: linear-gradient(100deg, var(--accent-ink), var(--accent)); -webkit-background-clip: text; background-clip: text; color: transparent; padding-right: .06em; }
+.page-head .lede { max-width: 58ch; }
+.jump { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+
+.card--link { display: flex; flex-direction: column; }
+.card--link p:not(.card__tag) { color: var(--muted); font-size: 15px; }
+.card__more { margin-top: auto; padding-top: 18px; font: 500 13px/1.4 var(--mono); }
+.card__more a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; transition: text-decoration-color .2s, color .2s; }
+.card__more a:hover { color: var(--accent-ink); text-decoration-color: var(--accent); }
+.card__stack { font: 400 12px/1.6 var(--mono); color: var(--muted); margin-top: 12px; }
+
+/* Game card: the art is dark in both themes, so the stage uses fixed colours */
+.card--game { padding: 0; overflow: hidden; }
+.card--game .project__stage { min-height: clamp(160px, 22vw, 220px); padding: 24px; overflow: hidden; }
+.card--game .project__logo { width: min(280px, 80%); }
+.card--game .card__text { padding: 26px; }
+.cards--single { grid-template-columns: minmax(0, 1fr); }
+.card--soon { display: grid; place-items: center; text-align: center; min-height: 120px; border-style: dashed; background: transparent; }
+.card--soon .card__tag { margin-bottom: 8px; }
+.card--soon p:last-child { color: var(--muted); font-size: 15px; }
+.card--feature { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 48px); align-items: center; padding: clamp(22px, 4vw, 40px); }
+.feature__title { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.feature__title img { width: 56px; height: 56px; flex: none; }
+.feature__title h3 { margin: 0; font-size: clamp(26px, 3.4vw, 36px); }
+.feature__text p:not(.card__tag):not(.callout):not(.card__more) { color: var(--muted); }
+.feature__text code { font: 400 .9em var(--mono); background: var(--surface-2); padding: 1px 6px; border-radius: 5px; }
+.card--feature .callout { margin: 18px 0 0; max-width: 62ch; }
+.feature__shot { justify-self: center; width: min(100%, 380px); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); background: #fff; }
+.feature__shot img { width: 100%; height: auto; }
+@media (max-width: 920px) { .card--feature { grid-template-columns: minmax(0, 1fr); } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav" id="top">
+    <div class="wrap nav__inner">
+      <a class="nav__brand" href="/" aria-label="Dylan Loo, home">Dylan Loo<span>.</span></a>
+      <nav class="nav__links" aria-label="Primary">
+        <a href="/">Home</a>
+        <a href="#quant">Quant</a>
+        <a href="#data-engineering">Data engineering</a>
+        <a href="#games">Games</a>
+        <a href="#utilities">Utilities</a>
+      </nav>
+      <div class="nav__actions">
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch theme" title="Switch theme">
+          <svg class="icon icon--moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+          <svg class="icon icon--sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </button>
+        <a class="btn btn--ghost btn--sm" href="/">← Home</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="page-head wrap">
+      <p class="eyebrow">Projects</p>
+      <h1>Things I build <em>outside</em> the dashboard.</h1>
+      <p class="lede">Quant experiments, data engineering, a game, and a few small tools. Most are side projects; some are coursework that turned into something I kept using.</p>
+      <div class="jump" aria-label="Jump to a section">
+        <a class="btn btn--ghost btn--sm" href="#quant">Quant</a>
+        <a class="btn btn--ghost btn--sm" href="#data-engineering">Data engineering</a>
+        <a class="btn btn--ghost btn--sm" href="#games">Games</a>
+        <a class="btn btn--ghost btn--sm" href="#utilities">Utilities</a>
+      </div>
+    </section>
+
+    <!-- ───────── Quant ───────── -->
+    <section class="section wrap" id="quant">
+      <header class="section__head">
+        <p class="eyebrow">01 · Quant</p>
+        <h2>Signals, simulations and trading.</h2>
+      </header>
+      <div class="cards cards--single">
+        <article class="card card--soon">
+          <p class="card__tag">Coming soon</p>
+          <p>Projects for this section are on the way.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ───────── Data engineering ───────── -->
+    <section class="section wrap" id="data-engineering">
+      <header class="section__head">
+        <p class="eyebrow">02 · Data engineering</p>
+        <h2>Pipelines, models and the plumbing behind them.</h2>
+      </header>
+      <div class="cards cards--single">
+        <article class="card card--soon">
+          <p class="card__tag">Coming soon</p>
+          <p>Projects for this section are on the way.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ───────── Games ───────── -->
+    <section class="section wrap" id="games">
+      <header class="section__head">
+        <p class="eyebrow">03 · Games</p>
+        <h2>A rhythm game, built for fun.</h2>
+      </header>
+      <div class="cards cards--single">
+        <article class="card card--game">
+          <div class="project__stage">
+            <img class="project__bg" src="/assets/beat-beat-city-menu.webp" alt="" loading="lazy">
+            <img class="project__logo" src="/assets/beat-beat-city-logo.webp" alt="Beat Beat City" loading="lazy">
+          </div>
+          <div class="card__text">
+            <p class="card__tag">Personal project · Game</p>
+            <h3>Beat Beat City</h3>
+            <p>A neon-lit rhythm game I built in my spare time. It's invite-only for now: the Mac and Windows downloads unlock with a key from me.</p>
+            <p class="card__more"><a href="/#beatbeatcity">Watch gameplay and download&nbsp;→</a></p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ───────── Utilities ───────── -->
+    <section class="section wrap" id="utilities">
+      <header class="section__head">
+        <p class="eyebrow">04 · Utilities</p>
+        <h2>Small tools that scratch an itch.</h2>
+      </header>
+      <div class="cards cards--single">
+        <article class="card card--feature">
+          <div class="feature__text">
+            <p class="card__tag">Open project · Looking for feedback &amp; collaborators</p>
+            <div class="feature__title">
+              <img src="/assets/claude-switcher-icon.png" alt="" width="56" height="56" loading="lazy">
+              <h3>Claude Switcher</h3>
+            </div>
+            <p>A <strong>lightweight tool for switching between Claude accounts and API connectors</strong>. It switches Claude Code between your claude.ai logins and LLM gateways without hand-editing <code>settings.json</code>.</p>
+            <p class="callout">I'm actively looking for feedback and collaborators. If you use Claude across several accounts or connectors, I'd like to hear what would make this more useful, and I'm open to contributions.</p>
+            <p class="card__stack">Windows tray app · PowerShell · Mac version not yet available</p>
+            <p class="card__more"><a href="https://github.com/dylanlooyq/claude-switcher" target="_blank" rel="noopener">View on GitHub&nbsp;↗</a> &nbsp;·&nbsp; <a href="#contact">Get in touch</a></p>
+          </div>
+          <figure class="feature__shot">
+            <img src="/assets/claude-switcher-screenshot.png" alt="The Claude Switcher window: one card per source, each showing live status and usage, with Switch, Refresh and Edit buttons." width="612" height="726" loading="lazy">
+          </figure>
+        </article>
+      </div>
+    </section>
+
+    <!-- ───────── Contact ───────── -->
+    <section class="section wrap contact" id="contact">
+      <div class="contact__box">
+        <p class="eyebrow">Contact</p>
+        <h2>Want to talk about any of these?</h2>
+        <p class="lede">Email is fastest.</p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="#contact" data-email>Email me</a>
+          <a class="btn btn--ghost" href="https://www.linkedin.com/in/dylanlooyq/" target="_blank" rel="noopener">LinkedIn&nbsp;↗</a>
+          <a class="btn btn--ghost" href="https://github.com/dylanlooyq" target="_blank" rel="noopener">GitHub&nbsp;↗</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <p class="footer__name" aria-hidden="true">Dylan Loo</p>
+      <p>© <span id="year">2026</span> Dylan Loo · Singapore</p>
+      <a href="#top">Back to top ↑</a>
+    </div>
+  </footer>
+
+  <script>
+(function () {
+  var root = document.documentElement;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ── Theme toggle: explicit choice wins, otherwise follow the OS ──
+  function effectiveTheme() {
+    var set = root.getAttribute('data-theme');
+    if (set) return set;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  document.getElementById('themeToggle').addEventListener('click', function () {
+    var next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+  });
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // ── Email: assembled at runtime so it isn't a plain mailto in the HTML ──
+  var email = ['dylanlyq', 'gmail.com'].join('@');
+  document.querySelectorAll('[data-email]').forEach(function (el) {
+    el.href = 'mailto:' + email;
+    el.textContent = email;
+  });
+
+  // ── Highlight the nav link for the section in view ──
+  var navLinks = document.querySelectorAll('.nav__links a');
+  if ('IntersectionObserver' in window) {
+    var navIo = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        navLinks.forEach(function (a) { a.classList.toggle('is-active', a.getAttribute('href') === '#' + e.target.id); });
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    navLinks.forEach(function (a) {
+      var h = a.getAttribute('href');
+      var s = h.charAt(0) === '#' ? document.querySelector(h) : null;
+      if (s) navIo.observe(s);
+    });
+  }
+
+  // ── Reveal-on-scroll ──
+  var targets = document.querySelectorAll('.card');
+  if (reduce || !('IntersectionObserver' in window)) return;
+  targets.forEach(function (el) { el.classList.add('reveal'); });
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('is-in');
+      io.unobserve(e.target);
+    });
+  }, { threshold: 0.12 });
+  targets.forEach(function (el) { io.observe(el); });
+})();
+  </script>
+</body>
+</html>
