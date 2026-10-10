@@ -596,10 +596,10 @@ html { scroll-padding-top: 96px; }
 @keyframes bbc-logo-tilt { 0%, 100% { transform: perspective(900px) rotateX(4deg) rotateY(-6deg); } 50% { transform: perspective(900px) rotateX(-3deg) rotateY(6deg); } }
 @keyframes bbc-logo-sheen { 0% { background-position: -60% -60%; } 100% { background-position: 160% 160%; } }
 /* The dancer stands at the right and points at the logo (which sits left to make room). She comes before the logo in the markup, so where a narrow screen overlaps them her hand goes behind the lettering. */
-.project__dancer { position: absolute; z-index: 1; right: 11%; bottom: -9%; height: 102%; width: auto; pointer-events: none; user-select: none; filter: drop-shadow(0 0 10px rgba(255, 120, 225, .45)) drop-shadow(0 0 34px rgba(79, 168, 255, .38)); animation: bbc-dancer-float 5.5s ease-in-out infinite; }
+.project__dancer { position: absolute; z-index: 1; right: 8.5%; bottom: -9%; height: 102%; width: auto; pointer-events: none; user-select: none; filter: drop-shadow(0 0 10px rgba(255, 120, 225, .45)) drop-shadow(0 0 34px rgba(79, 168, 255, .38)); animation: bbc-dancer-float 5.5s ease-in-out infinite; }
 .project__dancer--second { right: -0.5%; animation-delay: -2.6s; }
 @keyframes bbc-dancer-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-@media (max-width: 640px) { .project__logo-wrap { width: 52%; margin-left: 0; } .project__dancer { right: 9%; bottom: -8%; height: 92%; } .project__dancer--second { right: -5%; } }
+@media (max-width: 640px) { .project__logo-wrap { width: 52%; margin-left: 0; } .project__dancer { right: 7%; bottom: -8%; height: 92%; } .project__dancer--second { right: -5%; } }
 .project__body { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 64px); padding: clamp(22px, 4vw, 40px); align-items: start; }
 .project__body h3 { font-size: clamp(26px, 3.4vw, 36px); margin-bottom: 12px; }
 .project__body p { color: var(--muted); max-width: 52ch; }
