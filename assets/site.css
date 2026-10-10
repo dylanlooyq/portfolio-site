@@ -613,6 +613,17 @@ html { scroll-padding-top: 96px; }
 .dialog__video { display: block; width: 100%; max-height: calc(100vh - 140px); aspect-ratio: 16 / 9; background: #000; border-radius: calc(var(--radius) - 4px); }
 .project__note { margin-top: 14px; font-size: 13.5px; }
 .project__note a, .dialog__hint a { color: var(--ink); text-underline-offset: 3px; }
+/* Beat Beat City changelog: its list is written into projects.html by the game repo's tools/changelog.mjs --site */
+.project__changelog { margin-top: 10px; }
+.dialog--changelog { width: min(580px, calc(100% - 32px)); }
+.dialog--changelog .dialog__inner { justify-items: stretch; gap: 12px; }
+.changelog { max-height: min(62vh, 560px); overflow-y: auto; padding-right: 8px; }
+.changelog h3 { font: 500 12px/1.2 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--accent-ink); margin: 18px 0 8px; }
+.changelog ul { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px 20px; }
+.changelog ul.changelog__notes { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.changelog li { font-size: 14.5px; color: var(--ink); }
+.changelog li b { font-variant-numeric: tabular-nums; }
+@media (max-width: 520px) { .changelog ul { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 760px) { .project__body { grid-template-columns: minmax(0, 1fr); } }
 
 /* Access-key dialog (the shell is the CV dialog's) */

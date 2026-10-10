@@ -310,7 +310,10 @@
               <button class="btn btn--primary" type="button" data-game="windows"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-13.051-1.8"/></svg>Windows&nbsp;↓</button>
               <button class="btn btn--primary" type="button" data-game="mac"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>macOS&nbsp;↓</button>
             </div>
-            <p class="project__note">Current version: <b>0.3.2</b> (Demo)</p>
+            <p class="project__note">Current version: <b><span data-game-version>0.4.0</span></b> (Demo)</p>
+            <div class="project__buttons project__changelog">
+              <button class="btn btn--ghost btn--sm" type="button" id="viewChangelog">View the changelog</button>
+            </div>
             <p class="project__note">Need a key? <a href="#contact" data-key-request>Email me</a> and I'll send you one.</p>
           </div>
         </div>
@@ -380,6 +383,68 @@
     <div class="dialog__inner">
       <video class="dialog__video" id="gameplayVideo" controls playsinline preload="none" poster="assets/video/beatbeatcity-gameplay-poster.jpg"></video>
       <div class="dialog__actions"><button class="btn btn--ghost" type="button" id="videoClose">Close</button></div>
+    </div>
+  </dialog>
+
+  <!-- The list between the changelog marks is written by the game repo: node tools/changelog.mjs <from> --from-name <version> --site -->
+  <dialog class="dialog dialog--changelog" id="changelogDialog" aria-labelledby="changelogTitle">
+    <div class="dialog__inner">
+      <h2 id="changelogTitle">Beat Beat City <span data-game-version>0.4.0</span></h2>
+      <div class="changelog">
+        <!-- changelog:start -->
+        <p class="changelog__span">What's new since <b>0.3.2</b></p>
+        <h3>Stages and Story</h3>
+        <ul>
+          <li><b>10</b> new stages</li>
+          <li><b>10</b> new venues</li>
+          <li><b>14</b> new Story levels</li>
+        </ul>
+        <h3>Shopping Mall: clothes</h3>
+        <ul>
+          <li><b>35</b> new pairs of shoes</li>
+          <li><b>32</b> new tops</li>
+          <li><b>32</b> new bottoms</li>
+          <li><b>31</b> new full outfit sets</li>
+          <li><b>4</b> new dresses and one-pieces</li>
+        </ul>
+        <h3>Shopping Mall: accessories</h3>
+        <ul>
+          <li><b>50</b> new things to hold</li>
+          <li><b>41</b> new glasses and sunglasses</li>
+          <li><b>20</b> new pairs of earrings</li>
+          <li><b>19</b> new back pieces</li>
+          <li><b>17</b> new necklaces</li>
+          <li><b>9</b> new wrist pieces</li>
+        </ul>
+        <h3>Shopping Mall: hair, face and body</h3>
+        <ul>
+          <li><b>41</b> new pairs of eyes</li>
+          <li><b>33</b> new mouths</li>
+          <li><b>32</b> new hairstyles</li>
+          <li><b>15</b> new pairs of eyebrows</li>
+          <li><b>9</b> new eyeshadows</li>
+          <li><b>6</b> new noses</li>
+          <li><b>6</b> new blushes</li>
+          <li><b>5</b> new head shapes</li>
+        </ul>
+        <h3>Gameplay looks and sounds</h3>
+        <ul>
+          <li><b>13</b> new rating card designs</li>
+          <li><b>7</b> new arrow designs</li>
+          <li><b>7</b> new beat bar designs</li>
+          <li><b>1</b> new hit sound pack</li>
+        </ul>
+        <h3>Also new</h3>
+        <ul class="changelog__notes">
+          <li>Story is now a branching map, with team-up levels where you and a partner chase a target score together</li>
+          <li>Timing calibration: tune each song, or your whole setup, to your own ears</li>
+          <li>Right and left hand slots: carry a microphone, a fan, a bag or a balloon</li>
+          <li>Necklace pendants swing as you dance</li>
+          <li>The Windows download is now an installer, so the game opens in seconds</li>
+        </ul>
+        <!-- changelog:end -->
+      </div>
+      <div class="dialog__actions"><button class="btn btn--ghost" type="button" id="changelogClose">Close</button></div>
     </div>
   </dialog>
 
@@ -520,6 +585,12 @@ window.SITE_CONFIG = {
   document.getElementById('videoClose').addEventListener('click', function () { videoDialog.close(); });
   videoDialog.addEventListener('close', function () { gameplayVideo.pause(); });
   videoDialog.addEventListener('click', function (e) { if (e.target === videoDialog) videoDialog.close(); });   // click the backdrop
+
+  // ── Beat Beat City changelog ──
+  var changelogDialog = document.getElementById('changelogDialog');
+  document.getElementById('viewChangelog').addEventListener('click', function () { changelogDialog.showModal(); });
+  document.getElementById('changelogClose').addEventListener('click', function () { changelogDialog.close(); });
+  changelogDialog.addEventListener('click', function (e) { if (e.target === changelogDialog) changelogDialog.close(); });   // click the backdrop
 
   // ── Beat Beat City: access key → signed download link from the Worker ──
   var gameDialog = document.getElementById('gameDialog');
