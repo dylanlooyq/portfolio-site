@@ -569,10 +569,10 @@ html { scroll-padding-top: 96px; }
 /* ═════════ Personal projects: Beat Beat City ═════════ */
 .project { background: var(--surface); border: 1px solid var(--line); border-radius: calc(var(--radius) + 6px); overflow: hidden; box-shadow: var(--shadow), 0 0 0 1px rgba(255, 61, 203, .16), 0 0 34px -10px rgba(255, 61, 203, .38), 0 0 64px -22px rgba(79, 168, 255, .34); }
 /* The art is dark in both themes, so the stage uses fixed colours rather than theme tokens. */
-.project__stage { position: relative; isolation: isolate; display: grid; place-items: center; min-height: clamp(240px, 40vw, 460px); padding: clamp(20px, 5vw, 56px); background: #0b0620;  overflow: hidden; }
+.project__stage { position: relative; isolation: isolate; display: grid; place-items: center start; min-height: clamp(240px, 40vw, 460px); padding: clamp(20px, 5vw, 56px); background: #0b0620;  overflow: hidden; }
 .project__bg { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; object-position: 50% 55%; }
 .project__stage::after { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse at center, rgba(11, 6, 32, .15), rgba(11, 6, 32, .6) 100%), linear-gradient(to bottom, transparent 60%, rgba(11, 6, 32, .65)); }
-.project__logo-wrap { position: relative; display: inline-block; width: min(500px, 80%); animation: bbc-logo-tilt 6s ease-in-out infinite; }
+.project__logo-wrap { position: relative; display: inline-block; width: min(500px, 54%); margin-left: clamp(0px, 6%, 80px); animation: bbc-logo-tilt 6s ease-in-out infinite; }
 .project__logo { display: block; width: 100%; height: auto; animation: bbc-logo-aura 3.2s ease-in-out infinite; }
 /* The sheen is masked by the logo image, so it only shines on the lettering, not the transparent box around it. */
 .project__logo-wrap::after {
@@ -585,6 +585,10 @@ html { scroll-padding-top: 96px; }
 @keyframes bbc-logo-aura { 0%, 100% { filter: drop-shadow(0 0 8px rgba(255, 79, 216, .53)) drop-shadow(0 0 22px rgba(79, 168, 255, .33)); } 50% { filter: drop-shadow(0 0 18px rgba(255, 79, 216, .8)) drop-shadow(0 0 48px rgba(79, 168, 255, .67)); } }
 @keyframes bbc-logo-tilt { 0%, 100% { transform: perspective(900px) rotateX(4deg) rotateY(-6deg); } 50% { transform: perspective(900px) rotateX(-3deg) rotateY(6deg); } }
 @keyframes bbc-logo-sheen { 0% { background-position: -60% -60%; } 100% { background-position: 160% 160%; } }
+/* The dancer stands at the right and points at the logo (which sits left to make room). She comes before the logo in the markup, so where a narrow screen overlaps them her hand goes behind the lettering. */
+.project__dancer { position: absolute; right: 3%; bottom: -10%; height: 107%; width: auto; pointer-events: none; user-select: none; filter: drop-shadow(0 0 10px rgba(255, 120, 225, .45)) drop-shadow(0 0 34px rgba(79, 168, 255, .38)); animation: bbc-dancer-float 5.5s ease-in-out infinite; }
+@keyframes bbc-dancer-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@media (max-width: 640px) { .project__logo-wrap { width: 60%; margin-left: 0; } .project__dancer { right: -12%; } }
 .project__body { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 64px); padding: clamp(22px, 4vw, 40px); align-items: start; }
 .project__body h3 { font-size: clamp(26px, 3.4vw, 36px); margin-bottom: 12px; }
 .project__body p { color: var(--muted); max-width: 52ch; }
