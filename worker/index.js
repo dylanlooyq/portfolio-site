@@ -12,10 +12,26 @@ const SITEVERIFY = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 const CV_KEY = 'Dylan-Loo-CV.pdf';
 
 // Object names in GAME_BUCKET. The browser only ever sends "mac" or "windows".
+// A release writes `latest.json` to the bucket ({ "windows": "<object>", "mac": "<object>" }; the
+// game repo's tools/publish-builds.mjs does it), so a new version needs no redeploy. The names
+// here are served for a platform that file does not name.
 const GAME_FILES = {
   mac: 'BeatBeatCity-mac.zip',
   windows: 'BeatBeatCity-windows.zip',
 };
+const GAME_MANIFEST = 'latest.json';
+const CONTENT_TYPES = { zip: 'application/zip', dmg: 'application/x-apple-diskimage' };
+
+async function gameFile(env, platform) {
+  try {
+    const manifest = await (await env.GAME_BUCKET.get(GAME_MANIFEST))?.json();
+    const name = manifest?.[platform];
+    if (typeof name === 'string' && /^[\w.-]+$/.test(name)) return name;
+  } catch {
+    // An unreadable manifest must not take the downloads down.
+  }
+  return GAME_FILES[platform];
+}
 // Long enough to resume an interrupted download of a big file.
 const LINK_TTL_SECONDS = 60 * 60;
 
@@ -204,12 +220,13 @@ async function download(request, env, url, fail) {
   if (!platform) return fail(403, 'This link has expired. Go back to the site and enter your key again.');
 
   // `range: request.headers` makes R2 honour Range, so an interrupted download can resume.
-  const obj = await env.GAME_BUCKET.get(GAME_FILES[platform], { range: request.headers });
+  const name = await gameFile(env, platform);
+  const obj = await env.GAME_BUCKET.get(name, { range: request.headers });
   if (!obj) return fail(404, 'This build has not been uploaded yet.');
 
   const headers = new Headers({
-    'Content-Type': 'application/zip',
-    'Content-Disposition': `attachment; filename="${GAME_FILES[platform]}"`,
+    'Content-Type': CONTENT_TYPES[name.split('.').pop()] || 'application/octet-stream',
+    'Content-Disposition': `attachment; filename="${name}"`,
     'Accept-Ranges': 'bytes',
     'Cache-Control': 'private, no-store',
     ETag: obj.httpEtag,

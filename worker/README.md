@@ -41,6 +41,13 @@ fetches the zip from R2 with a normal progress bar (and resume, if the connectio
    so permissions survive. Wrangler uploads top out around 300 MB; for bigger builds use
    `node upload-big.mjs <file> beat-beat-city <key>` (setup is in the header of that file) or `rclone`
    against the bucket's S3 endpoint. To ship a new version, run the same upload again (no redeploy).
+
+   **Versioned builds.** If the bucket holds a `latest.json` such as
+   `{ "windows": "BeatBeatCity-0.3.4-windows.exe", "mac": "BeatBeatCity-0.3.4-mac.dmg" }`, the Worker
+   serves those objects instead (a platform it does not name keeps the name in `GAME_FILES`). The game
+   repo's `node tools/publish-builds.mjs` runs the Mac build on GitHub, uploads the Windows exe and the
+   Mac dmg under their version and rewrites `latest.json` last, so the switch happens only once both
+   files are in place. It reads the R2 keys from `DYLAN.txt`.
 3. **Set the link-signing secret** (any long random string, only the Worker ever sees it)
    ```
    node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
