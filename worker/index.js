@@ -4,6 +4,8 @@
 //   POST /cv              Cloudflare Turnstile check, then the CV PDF (CV_BUCKET)
 //   POST /game/unlock     access key + platform, then a signed one-hour download link
 //   GET  /game/download   streams the Beat Beat City build for that link (GAME_BUCKET)
+//   GET  /game/looks/<sha256>.pack   a pack of the game's look store, fetched by the installed game
+//                         itself before it first opens (no key: see lookPack below)
 //
 // Game access keys are KV entries (GAME_KEYS): key = the access key, value = who it was
 // issued to. Mint and revoke them with `node keys.mjs` (see README.md).
@@ -90,6 +92,13 @@ export default {
     if (url.pathname === '/game/download') {
       if (request.method !== 'GET') return fail(405, 'Method not allowed');
       return download(request, env, url, fail);
+    }
+
+    // The installed game, not a browser: no Origin, no key (see lookPack).
+    const pack = /^\/game\/looks\/([0-9a-f]{64}\.pack)$/.exec(url.pathname);
+    if (pack) {
+      if (request.method !== 'GET') return fail(405, 'Method not allowed');
+      return lookPack(request, env, pack[1], fail);
     }
 
     const route = { '/cv': cv, '/game/unlock': unlock }[url.pathname];
@@ -224,13 +233,27 @@ async function download(request, env, url, fail) {
   const obj = await env.GAME_BUCKET.get(name, { range: request.headers });
   if (!obj) return fail(404, 'This build has not been uploaded yet.');
 
-  const headers = new Headers({
+  return ranged(request, obj, {
     'Content-Type': CONTENT_TYPES[name.split('.').pop()] || 'application/octet-stream',
     'Content-Disposition': `attachment; filename="${name}"`,
-    'Accept-Ranges': 'bytes',
     'Cache-Control': 'private, no-store',
-    ETag: obj.httpEtag,
   });
+}
+
+// The Windows installer cannot hold the game's look store (NSIS stops at 2 GB), so the installed game
+// fetches it as packs before it first opens (the game repo's setup-looks.cjs; tools/publish-builds.mjs
+// uploads them as looks/<sha256>.pack). There is no key here on purpose: a pack's name is the SHA-256
+// of its contents, which only the installer lists, and the installer is what the key guards. A pack is
+// outfit geometry, of no use without the game. The name never changes what it holds, so it may be cached.
+async function lookPack(request, env, name, fail) {
+  const obj = await env.GAME_BUCKET.get(`looks/${name}`, { range: request.headers });
+  if (!obj) return fail(404, 'Not found');
+  return ranged(request, obj, { 'Content-Type': 'application/octet-stream', 'Cache-Control': 'public, max-age=31536000, immutable' });
+}
+
+// An R2 object as a response that honours Range (206 and Content-Range when a range was asked for).
+function ranged(request, obj, extra) {
+  const headers = new Headers({ ...extra, 'Accept-Ranges': 'bytes', ETag: obj.httpEtag });
   let status = 200;
   if (obj.range && request.headers.has('Range')) {
     const start = obj.range.offset ?? 0;

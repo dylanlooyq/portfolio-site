@@ -8,6 +8,7 @@ Worker's URL.
 | --- | --- | --- |
 | `POST /cv` | Cloudflare Turnstile captcha | CV PDF (`dylan-cv` bucket) |
 | `POST /game/unlock` → `GET /game/download` | Access key from you | Beat Beat City builds (`beat-beat-city` bucket) |
+| `GET /game/looks/<sha256>.pack` | None (the name is the SHA-256 of the pack, listed only inside the installer) | The look-store packs the installed Windows game fetches before it first opens (`looks/` in the same bucket) |
 
 Cloudflare's free tier is enough for all of it. One-time prerequisite, from this `worker/` folder:
 
@@ -48,6 +49,14 @@ fetches the zip from R2 with a normal progress bar (and resume, if the connectio
    repo's `node tools/publish-builds.mjs` runs the Mac build on GitHub, uploads the Windows exe and the
    Mac dmg under their version and rewrites `latest.json` last, so the switch happens only once both
    files are in place. It reads the R2 keys from `DYLAN.txt`.
+
+   **Look packs.** The Windows installer cannot hold the game's look store (NSIS stops at 2 GB), so
+   the installed game fetches it as ~27 packs before its window first opens. `publish-builds.mjs`
+   uploads them as `looks/<sha256>.pack` before the installer, and the Worker serves them at
+   `/game/looks/<sha256>.pack` with Range (a dropped download goes on from where it stopped). No key:
+   a pack is named by the hash of its contents, which only the installer knows, and holds outfit
+   geometry that is of no use without the game. The route is in `index.js`, so it needs one
+   `wrangler deploy` before the first version that uses it is published.
 3. **Set the link-signing secret** (any long random string, only the Worker ever sees it)
    ```
    node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
