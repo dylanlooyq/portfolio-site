@@ -55,8 +55,12 @@ fetches the zip from R2 with a normal progress bar (and resume, if the connectio
    uploads them as `looks/<sha256>.pack` before the installer, and the Worker serves them at
    `/game/looks/<sha256>.pack` with Range (a dropped download goes on from where it stopped). No key:
    a pack is named by the hash of its contents, which only the installer knows, and holds outfit
-   geometry that is of no use without the game. The route is in `index.js`, so it needs one
-   `wrangler deploy` before the first version that uses it is published.
+   geometry that is of no use without the game. The route is in `index.js` (deployed 2026-10-11).
+
+   **Deploy this Worker with `wrangler deploy --config wrangler.toml`.** The site's own Worker has a
+   `wrangler.jsonc` one folder up, and wrangler 4 finds that one first even from inside `worker/`:
+   a bare `wrangler deploy` here redeploys the site (`portfolio-site`), not `dylan-cv`. Check with
+   `--dry-run`: this Worker lists the `GAME_BUCKET`, `CV_BUCKET` and `GAME_KEYS` bindings.
 3. **Set the link-signing secret** (any long random string, only the Worker ever sees it)
    ```
    node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
