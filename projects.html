@@ -34,6 +34,8 @@
 .page-head h1 { font-size: clamp(38px, 6vw, 68px); max-width: 16ch; margin-bottom: 24px; }
 .page-head h1 em { font-style: italic; background: linear-gradient(100deg, var(--accent-ink), var(--accent)); -webkit-background-clip: text; background-clip: text; color: transparent; padding-right: .06em; }
 .jump { display: flex; flex-wrap: wrap; gap: 10px; }
+/* Section titles sit on one line from tablet up; 4vw keeps the longest (about 22.5em wide) inside the wrap */
+@media (min-width: 760px) { .section__head h2 { font-size: clamp(30px, 4vw, 48px); max-width: none; } }
 
 .card--link { display: flex; flex-direction: column; }
 .card--link p:not(.card__tag) { color: var(--muted); font-size: 15px; }
