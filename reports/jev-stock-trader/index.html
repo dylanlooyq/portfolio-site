@@ -3,11 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Jev versus traditional classifiers: backtests</title>
+<title>Jev versus traditional classifiers for trading stocks: backtests</title>
 <style>
   /* Layout: one column. A locked bar (title, tabs and filters) stays on screen; below it the
-     caution, the takeaway, four headline figures, then growth, drawdown, the interval
-     chart and the full table. The Models and strategies tab is the report half. */
+     About card (what the project tests, why Jev trails, related research), four headline
+     figures, then growth, drawdown, the interval chart and the full table. The Models and
+     strategies tab is the report half. Nothing may be wider than the page: on a phone that
+     widens the layout and the locked bar stops following the screen. */
   :root {
     color-scheme: light;
     --page: #f3f2ee; --surface: #fcfcfb; --border: #e2e0da; --grid: #eae8e2; --axis: #b9b7ae;
@@ -29,7 +31,7 @@
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--page); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.45; }
   .page { max-width: 72rem; margin-inline: auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 0 56px;
-    display: flex; flex-direction: column; gap: 24px; }
+    display: flex; flex-direction: column; gap: 24px; overflow-x: clip; }
   h1 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: clamp(1.35rem, 2.6vw, 1.75rem); line-height: 1.2; }
   h2 { margin: 0; font-size: 1.02rem; font-weight: 600; }
   p { margin: 0; }
@@ -37,7 +39,14 @@
     border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
   .titles { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px; }
   .run { color: var(--muted); font-size: .82rem; }
-  .takeaway { max-width: 70ch; }
+  .caution:empty { display: none; }
+  .card.about { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 20px 36px; align-items: start; }
+  .about .stack { gap: 20px; }
+  .about a { color: var(--text); text-underline-offset: 3px; }
+  .papers { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: .86rem; }
+  .papers li { display: flex; flex-direction: column; gap: 1px; color: var(--text-2); }
+  .papers a { font-weight: 600; }
+  @media (max-width: 860px) { .card.about { grid-template-columns: minmax(0, 1fr); } }
   .caution { max-width: 78ch; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
     font-size: .87rem; color: var(--text-2); }
   .flag { color: var(--warn); font-weight: 600; }
@@ -56,13 +65,18 @@
   .btn[aria-pressed="true"] { background: var(--text); color: var(--page); border-color: var(--text); }
   .btn:disabled { opacity: .4; cursor: not-allowed; }
   .btn:focus-visible, .key:focus-visible, .select:focus-visible, .term:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
-  /* On a narrow screen the locked bar stays short: the filters sit on one row that scrolls sideways. */
+  /* On a narrow screen every filter stays in view, two to a row, and the locked bar is kept short. */
   @media (max-width: 640px) {
+    h1 { font-size: 1.08rem; }
     .run { display: none; }
-    .controls { flex-wrap: nowrap; overflow-x: auto; padding: 8px 10px; gap: 12px; }
-    .control { flex: none; }
+    .topbar { padding-block: 10px 8px; gap: 6px; }
+    .tab { padding: 6px 10px; font-size: .86rem; }
+    .controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 10px; padding: 8px 10px; }
+    .control { min-width: 0; gap: 2px; }
+    .control-label { font-size: .72rem; }
+    .select { min-width: 0; width: 100%; padding-block: 4px; }
     .seg { flex-wrap: nowrap; }
-    .select { min-width: 0; }
+    .seg .btn { flex: 1; padding: 4px 6px; }
   }
 
   /* A term with a popup explanation. One popup node is shared by every term on the page. */
@@ -85,7 +99,7 @@
   .scale { color: var(--muted); font-weight: 400; font-size: .82rem; }
   .legend { display: flex; flex-wrap: wrap; gap: 4px 6px; }
   .key { font: inherit; font-size: .8rem; color: var(--text-2); background: none; border: 1px solid transparent; border-radius: 6px;
-    padding: 3px 7px; display: inline-flex; align-items: center; gap: 7px; cursor: pointer; white-space: nowrap; }
+    padding: 3px 7px; display: inline-flex; align-items: center; gap: 7px; cursor: pointer; text-align: left; }
   .key:hover { border-color: var(--border); }
   .key[aria-pressed="false"] { opacity: .4; text-decoration: line-through; }
   .swatch { display: inline-block; width: 16px; height: 0; border-top: 2px solid var(--text); flex: none; }
@@ -95,7 +109,7 @@
   .tick { fill: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; }
   .rowlabel { fill: var(--text); font-size: 12.5px; }
   .rowvalue { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
-  .tip { position: absolute; top: 0; left: 0; z-index: 2; pointer-events: none; white-space: nowrap; background: var(--pop);
+  .tip { position: absolute; top: 0; left: 0; z-index: 2; pointer-events: none; max-width: 100%; background: var(--pop);
     border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow); padding: 7px 10px; font-size: .8rem;
     font-variant-numeric: tabular-nums; }
   .tip-head { color: var(--text-2); margin-bottom: 2px; }
@@ -118,7 +132,6 @@
   .stack { display: flex; flex-direction: column; gap: 24px; }
   .stack[hidden] { display: none; }
   .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); }
-  .takeaway:empty { display: none; }
   .tab { font: inherit; font-size: .92rem; padding: 8px 14px; cursor: pointer; background: none; color: var(--muted);
     border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; }
   .tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--text); font-weight: 600; }
@@ -141,7 +154,7 @@
 <main class="page">
   <header class="topbar">
     <div class="titles">
-      <h1>Jev versus traditional classifiers</h1>
+      <h1>Jev versus traditional classifiers for trading stocks</h1>
       <span class="run" id="run"></span>
     </div>
     <div class="tabs" role="tablist" id="tabs">
@@ -154,7 +167,7 @@
   <p class="caution" id="caution"></p>
 
   <div class="stack" id="view-backtests" role="tabpanel" aria-labelledby="tab-backtests">
-  <p class="takeaway" id="takeaway"></p>
+  <section class="card about" id="about"></section>
 
   <section class="tiles" id="tiles"></section>
 
@@ -634,36 +647,26 @@
     hidePop();   // the terms below are rebuilt, so a popup left open would point at nothing
     $('run').textContent = `Backtests, run ${run.name}`;
 
-    const take = $('takeaway');
-    take.replaceChildren();
-    take.append(`${reliable} of ${tested.length} ${tested.length === 1 ? 'strategy has' : 'strategies have'} a `, term(sharpeName),
-      ' reliably different from equal-weight buy and hold in this view.');
-    if (v.power) {
-      take.append(` The 95% interval on a Sharpe difference is typically ±${num(v.power.half_width)} here, so a true difference smaller than about ${num(v.power.mde_80)} would usually be missed.`);
-    }
-
+    // The caution line only appears when the view on screen is not the experiment's test. The About card carries the rest.
     const caution = $('caution');
     caution.replaceChildren();
     if (run.smoke) caution.appendChild(el('span', 'flag', 'Pipeline check, not a finding. '));
-    else if (!run.full_window) caution.appendChild(el('span', 'flag', 'Partial window, not the verdict run. '));
-    else if (!run.external_ran.length) caution.appendChild(el('span', 'flag', 'Baselines only: no verdict on Jev yet. '));
-    if (!net) caution.appendChild(el('span', 'flag', 'Trading costs removed: a what-if view, not the experiment’s test. '));
-    caution.append(`${run.assets} assets, ${run.folds} walk-forward folds, ${v.first_date} to ${v.last_date}. `, net
-      ? `Trading cost ${run.cost_bps} basis points per trade. `
-      : `Trading cost set to zero; the test charges ${run.cost_bps} basis points per trade. `);
-    caution.append(run.external_ran.length
-      ? `External classifiers included: ${run.external_ran.join(', ')}.`
-      : 'Jev has not been run, so no Jev strategy appears here.');
-    if (run.hindsight) caution.append(' ' + run.hindsight);
-    if (v.thinned > 1) caution.append(` Lines show every ${ordinal(v.thinned)} trading day; all statistics use every day.`);
+    if (!net) {
+      caution.append(el('span', 'flag', 'Trading costs removed: a what-if view, not the experiment’s test. '),
+        `The test charges ${run.cost_bps} basis points per trade.`);
+    }
 
     $('growth-title').textContent = net ? 'Growth of $1, net of costs' : 'Growth of $1, before trading costs';
-    $('forest-note').replaceChildren('Each strategy’s ', term(sharpeName),
-      ' minus buy and hold, with a 95% bootstrap interval. Right of zero is better. An interval that crosses zero means the difference could be chance.');
+    const forest = ['Each strategy’s ', term(sharpeName),
+      ' minus buy and hold, with a 95% bootstrap interval. Right of zero is better. An interval that crosses zero means the difference could be chance.',
+      ` Here ${reliable} of ${tested.length} ${tested.length === 1 ? 'strategy differs' : 'strategies differ'} reliably from buy and hold.`];
+    if (v.power) forest.push(` The interval is typically ±${num(v.power.half_width)} wide, so a true difference smaller than about ${num(v.power.mde_80)} would usually be missed.`);
+    $('forest-note').replaceChildren(...forest);
     $('table-note').textContent = `Sorted by ${sharpeName}. Alpha and beta are measured against the market index. The last column repeats the backtest at a cost of 10 basis points per trade.`;
-    $('growth-note').textContent = state.rule !== 'buy_names'
+    $('growth-note').textContent = (state.rule !== 'buy_names'
       ? `Each strategy holds its top ${run.held[state.rule]} of ${run.assets} assets by its own score, equally weighted and fully invested. It differs from buy and hold only in which assets it holds.${state.rule === 'rank_check' ? ' This concentrated version is a declared check, not the primary test.' : ''}`
-      : `Each strategy holds only the assets its model labels BUY and keeps the rest in cash${run.risk_free === 'tbill' ? ' earning the Treasury bill rate' : ''}, so it is partly invested. Both buy-and-hold lines are fully invested.`;
+      : `Each strategy holds only the assets its model labels BUY and keeps the rest in cash${run.risk_free === 'tbill' ? ' earning the Treasury bill rate' : ''}, so it is partly invested. Both buy-and-hold lines are fully invested.`)
+      + (v.thinned > 1 ? ` Lines show every ${ordinal(v.thinned)} trading day; all statistics use every day.` : '');
 
     const best = tested.slice().sort((a, b) => (v.stats[b].sharpe ?? -9) - (v.stats[a].sharpe ?? -9))[0];
     const label = (id) => (v.strategies.find((s) => s.id === id) || {}).label || id;
@@ -686,6 +689,91 @@
 
     const status = Object.entries(run.external).map(([k, s]) => `${k}: ${s}`).join('; ');
     $('foot').textContent = `Generated from run ${run.name} (commit ${run.commit}, ${run.generated}). Sharpe ratios use returns in excess of ${run.risk_free === 'tbill' ? 'the Treasury bill rate' : 'zero'}. External classifier status: ${status || 'none registered'}.`;
+  }
+
+  // ---- About card: what the project tests, why Jev trails, and what other researchers found.
+  // It describes the experiment's primary test, costs included, and does not change with the filters.
+  const RESEARCH = [
+    ['Lopez-Lira and Tang, 2023', 'Can ChatGPT Forecast Stock Price Movements? Return Predictability and Large Language Models', 'https://arxiv.org/abs/2304.07619',
+      'GPT-4’s scores of news headlines predicted the price drift that followed, most for small stocks and negative news. The model was reading news, which this experiment deliberately leaves out.'],
+    ['Li, Kim, Cucuringu and Ma, 2025', 'Can LLM-based Financial Investing Strategies Outperform the Market in Long Run?', 'https://arxiv.org/abs/2505.07078',
+      'Backtested over two decades and more than 100 stocks, the advantages that narrower studies reported for language-model trading strategies shrank considerably.'],
+    ['Tan, Merrill, Gupta, Althoff and Hartvigsen, 2024', 'Are Language Models Actually Useful for Time Series Forecasting?', 'https://arxiv.org/abs/2406.16964',
+      'In three popular forecasters built on language models, removing the language model or swapping it for a simple attention layer did not hurt accuracy and often helped.'],
+    ['Glasserman and Lin, 2023', 'Assessing Look-Ahead Bias in Stock Return Predictions Generated By GPT Sentiment Analysis', 'https://arxiv.org/abs/2309.17322',
+      'What a model already knows about the companies in a headline can distort a backtest; they test this by removing company names. The same concern is why tickers and dates are hidden from Jev here.'],
+    ['Lopez-Lira, Tang and Zhu, 2025', 'The Memorization Problem: Can We Trust LLMs’ Economic Forecasts?', 'https://arxiv.org/abs/2504.14765',
+      'Language models can recall economic and financial figures from before their knowledge cutoff, so their forecasts for those periods may be memory, not prediction.'],
+    ['Grinsztajn, Oyallon and Varoquaux, 2022', 'Why do tree-based models still outperform deep learning on tabular data?', 'https://arxiv.org/abs/2207.08815',
+      'Across 45 tabular datasets, tree-based models such as random forests and gradient boosting still beat deep learning on medium-sized data. Two of the three classifiers here are of that kind.'],
+    ['Gu, Kelly and Xiu, 2020', 'Empirical Asset Pricing via Machine Learning', 'https://www.nber.org/papers/w25398',
+      'Comparing machine-learning methods for predicting stock returns, trees and neural networks did best, and every method leaned on the same signals: momentum, liquidity and volatility. Their data covers far more stocks and predictors than this experiment.'],
+  ];
+  const JEV_NOTES = 'https://docs.typesafe.ai/model-jaggedness/jev-1.13';
+  function drawAbout() {
+    const run = DATA.run, P = DATA.models.portfolio;
+    const v = DATA.views[`${DATA.defaults.segment}|${DATA.defaults.rule}|${DATA.defaults.horizon}`];
+    const para = (...parts) => { const n = el('p'); n.append(...parts); return n; };
+    const bold = (t) => el('b', null, t);
+    const link = (text, href) => { const a = el('a', null, text); a.href = href; a.target = '_blank'; a.rel = 'noopener'; return a; };
+    const block = (title, ...nodes) => { const d = el('div', 'prose'); d.append(el('h2', null, title), ...nodes); return d; };
+    const sharpe = (id, free) => ((free ? v.free.stats[id] : v.stats[id]) || {}).sharpe;
+    const versus = (a, b) => (a < b - 0.02 ? 'below' : a > b + 0.02 ? 'above' : 'level with');
+
+    const status = el('p');
+    if (run.smoke) status.appendChild(el('span', 'flag', 'Pipeline check, not a finding. '));
+    else if (!run.full_window) status.appendChild(el('span', 'flag', 'Not the verdict yet. '));
+    status.append(`The results below cover ${run.folds} yearly test periods, ${v.first_date} to ${v.last_date}, each predicted by models that had only seen earlier data.`,
+      run.smoke || run.full_window ? '' : ' The final two years stay locked until the design is run once on the full window.',
+      run.external_ran.length ? '' : ' Jev has not been run, so no Jev strategy appears here.',
+      run.hindsight ? ' ' + run.hindsight : '');
+    const what = block('What this project tests',
+      para('Can Jev, a hosted model that answers multiple-choice questions about a piece of text, pick what to hold better than standard machine-learning classifiers? ',
+        `After each market close, every strategy sees the same 27 price and volume readings for each of ${run.assets} assets and calls BUY, HOLD or SELL. Jev gets them as text, with no ticker, date or price level.`,
+        ` The calls are turned into a portfolio by one rule, and each strategy is compared with simply holding all ${run.assets} assets in equal parts.`),
+      status);
+
+    const left = el('div', 'stack'), cells = [left];
+    left.appendChild(what);
+    const sig = v.strategies.find((s) => s.group === 'jev');
+    const jev = sig && sharpe(sig.id), hold = sharpe('always_buy');
+    if (sig && jev < hold) {
+      const random = sharpe('stratified_random'), plusId = sig.id.replace('signal', 'plus_controlled');
+      const turns = v.stats[sig.id].annual_turnover;
+      const reasons = el('ul', 'steps');
+      const reason = (head, ...parts) => { const li = el('li'); li.append(bold(head + ' '), ...parts); reasons.appendChild(li); };
+      reason('Its picks show no edge before costs.',
+        `With trading costs left out, Jev’s own calls score ${num(sharpe(sig.id, true))}: ${versus(sharpe(sig.id, true), sharpe('stratified_random', true))} picking assets at random (${num(sharpe('stratified_random', true))}) and ${versus(sharpe(sig.id, true), sharpe('always_buy', true))} buy and hold (${num(sharpe('always_buy', true))}).`);
+      reason('Frequent trading is expensive.',
+        `Its picks change often. It trades ${num(turns, 0)} times its capital a year, which costs about ${fixed(turns * run.cost_bps / 100, 1)}% a year at ${run.cost_bps} basis points per trade and brings its score down to ${num(jev)}.`);
+      const gbt = sharpe('gbt'), plus = sharpe(plusId);
+      reason('It never learns from these markets.',
+        'Jev is used as it comes: nothing is fitted to this data, while the classifiers are retrained before every test year.',
+        gbt != null && plus != null ? ` Giving its answers to a classifier as extra inputs ${Math.abs(plus - gbt) < 0.05 ? 'barely moves the result' : 'changes the result'}: gradient-boosted trees score ${num(gbt)} on the 27 readings alone and ${num(plus)} with Jev’s answers added.` : '');
+      reason('Numbers are its documented weak spot.',
+        'The readings are returns, ratios and percentiles written out as text. ', link('TypeSafe’s own notes on this version', JEV_NOTES),
+        ' say it “struggles with tasks that require numeric precision” and does better on semantic questions than mathematical ones.');
+      reason('There may be little to find.',
+        'The inputs are past prices and volumes of heavily traded assets, which anyone can see. The trained classifiers find very little in them too',
+        v.diffs.some((d) => d.lo > 0) ? '.' : ', and no strategy here reliably beats buy and hold.',
+        ' News and company names might help a model that reads text, but they are left out on purpose, so that it cannot simply recall what happened next.');
+      left.appendChild(block('Why Jev does not seem to be good at this',
+        para(`On the main test (top ${P.held} of ${P.assets} assets, ${DATA.defaults.horizon}-day holding, costs included) Jev’s own calls earn a `, term('net Sharpe ratio'),
+          ` of ${num(jev)}, against ${num(random)} for picking assets at random and ${num(hold)} for buy and hold. The likely reasons:`),
+        reasons,
+        para(bold('One caution. '), `This is a single question wording ${sig.id.endsWith('_zero') ? 'with no worked examples' : 'with worked examples'}, on a small set of assets.`,
+          v.power ? ` A run this size would usually miss a true Sharpe difference smaller than about ${num(v.power.mde_80)}, so it cannot rule out a small edge.` : '')));
+    }
+
+    const papers = el('ul', 'papers');
+    RESEARCH.forEach(([who, title, href, finding]) => {
+      const li = el('li');
+      li.append(link(title, href), el('span', 'subtle', who), el('span', null, finding));
+      papers.appendChild(li);
+    });
+    cells.push(block('What other researchers found', papers,
+      el('p', 'subtle', 'The one-line summaries are mine. Follow the links for the papers themselves.')));
+    $('about').replaceChildren(...cells);
   }
 
   function render() {
@@ -838,6 +926,7 @@
   }
   TABS.forEach((t) => $('tab-' + t).addEventListener('click', () => showTab(t)));
   buildControls();
+  drawAbout();
 
   let pending = 0;
   window.addEventListener('resize', () => { cancelAnimationFrame(pending); pending = requestAnimationFrame(render); });
