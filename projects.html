@@ -30,11 +30,10 @@
   <link rel="stylesheet" href="/assets/site.css">
   <style>
 /* Page-specific bits; everything else comes from site.css */
-.page-head { padding-block: clamp(48px, 9vw, 104px) clamp(32px, 5vw, 56px); }
-.page-head h1 { font-size: clamp(38px, 6vw, 68px); max-width: 16ch; margin-bottom: 20px; }
-.page-head h1 em { font-style: italic; background: linear-gradient(100deg, var(--accent-ink), var(--accent)); -webkit-background-clip: text; background-clip: text; color: transparent; padding-right: .06em; }
-.page-head .lede { max-width: 58ch; }
-.jump { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+/* The header is just the jump links; the heading stays in the page for screen readers and search engines */
+.page-head { padding-block: clamp(28px, 5vw, 48px) clamp(20px, 3vw, 32px); }
+.page-head h1 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.jump { display: flex; flex-wrap: wrap; gap: 10px; }
 
 .card--link { display: flex; flex-direction: column; }
 .card--link p:not(.card__tag) { color: var(--muted); font-size: 15px; }
@@ -186,9 +185,7 @@
 
   <main id="main">
     <section class="page-head wrap">
-      <p class="eyebrow">Projects</p>
-      <h1>Things I build <em>outside</em> of work.</h1>
-      <p class="lede">Quant experiments, data engineering, a game, and a few small tools. Most are side projects; some are coursework that turned into something I kept using.</p>
+      <h1>Things I build outside of work</h1>
       <div class="jump" aria-label="Jump to a section">
         <a class="btn btn--ghost btn--sm" href="#quant">Quant</a>
         <a class="btn btn--ghost btn--sm" href="#data-engineering">Data engineering</a>
