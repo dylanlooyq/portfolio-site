@@ -6,7 +6,7 @@
 <title>Jev versus traditional classifiers for trading stocks: backtests</title>
 <style>
   /* Layout: one column. A locked bar (title, tabs and filters) stays on screen; below it the
-     About card (what the project tests, why Jev trails, related research), four headline
+     About card (what the project tests and why Jev trails; it folds away), four headline
      figures, then growth, drawdown, the interval chart and the full table. The Models and
      strategies tab is the report half. Nothing may be wider than the page: on a phone that
      widens the layout and the locked bar stops following the screen. */
@@ -40,13 +40,16 @@
   .titles { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px; }
   .run { color: var(--muted); font-size: .82rem; }
   .caution:empty { display: none; }
-  .card.about { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 20px 36px; align-items: start; }
   .about .stack { gap: 20px; }
+  @media (min-width: 900px) {
+    .about .stack:not([hidden]) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 20px 40px; align-items: start; }
+  }
   .about a { color: var(--text); text-underline-offset: 3px; }
-  .papers { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: .86rem; }
-  .papers li { display: flex; flex-direction: column; gap: 1px; color: var(--text-2); }
-  .papers a { font-weight: 600; }
-  @media (max-width: 860px) { .card.about { grid-template-columns: minmax(0, 1fr); } }
+  .fold { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left;
+    display: inline-flex; align-items: center; gap: 8px; }
+  .fold svg { flex: none; color: var(--muted); transition: transform .15s; }
+  .fold[aria-expanded="true"] svg { transform: rotate(180deg); }
+  .fold:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
   .caution { max-width: 78ch; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
     font-size: .87rem; color: var(--text-2); }
   .flag { color: var(--warn); font-weight: 600; }
@@ -87,6 +90,8 @@
     text-align: left; white-space: normal; }
   .pop[hidden] { display: none; }
   .pop b { color: var(--text); font-weight: 600; }
+  .pop .tip-row { align-items: baseline; }
+  .pop .tip-val { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--text); }
 
   .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: 14px; }
   .tile, .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px;
@@ -292,30 +297,39 @@
   let popFor = null;
   const hidePop = () => { pop.hidden = true; popFor = null; };
   function placePop(scrolled) {
-    const r = popFor.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+    // A filter's label opens its popup below the whole filter, so the buttons it explains stay in view.
+    const r = (popFor.closest('.control') || popFor).getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
     const bar = document.querySelector('.topbar').getBoundingClientRect().bottom;
     if (scrolled && (r.top < bar || r.bottom > window.innerHeight)) { hidePop(); return; }
-    const above = r.bottom + 8 + h > window.innerHeight && r.top - 8 - h > bar;
+    // Below the term if it fits, else above it, else pinned to the bottom of the screen.
+    const fits = r.bottom + 8 + h <= window.innerHeight, above = r.top - 8 - h > bar;
+    const top = fits ? r.bottom + 8 : above ? r.top - 8 - h : Math.max(bar + 4, window.innerHeight - h - 8);
     pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + 'px';
-    pop.style.top = (above ? r.top - 8 - h : r.bottom + 8) + 'px';
+    pop.style.top = top + 'px';
   }
-  function showPop(node) {
+  function showPop(node, help) {
     if (popFor === node) return;
     popFor = node;
-    pop.replaceChildren(...sharpeHelp());
+    pop.replaceChildren(...help());
     pop.hidden = false;
     placePop();
   }
-  function term(text) {
+  // `help` builds the popup's paragraphs when it opens; the Sharpe ratio explanation is the default.
+  function term(text, help = sharpeHelp) {
     const node = el('span', 'term', text);
     node.tabIndex = 0;
     node.setAttribute('aria-describedby', 'pop');
-    node.addEventListener('pointerenter', (event) => { if (event.pointerType === 'mouse') showPop(node); });
+    node.addEventListener('pointerenter', (event) => { if (event.pointerType === 'mouse') showPop(node, help); });
     node.addEventListener('pointerleave', (event) => { if (event.pointerType === 'mouse') hidePop(); });
-    node.addEventListener('focus', () => showPop(node));
+    node.addEventListener('focus', () => showPop(node, help));
     node.addEventListener('blur', hidePop);
-    node.addEventListener('click', (event) => { event.stopPropagation(); showPop(node); });
+    node.addEventListener('click', (event) => { event.stopPropagation(); showPop(node, help); });
     return node;
+  }
+  function costsHelp() {
+    const bps = DATA.run.cost_bps, p = el('p');
+    p.append(el('b', null, 'Trading costs. '), `Every trade is charged ${bps} basis points (${fixed(bps / 100, 2)}%) of the amount traded. The experiment’s test includes this cost. Removed shows the same strategies with no cost, as a what-if.`);
+    return [p];
   }
   document.addEventListener('click', hidePop);
   document.addEventListener('keydown', (event) => { if (event.key === 'Escape') hidePop(); });
@@ -589,9 +603,11 @@
   // Every filter picks exactly one value. Strategies also applies to the Models and strategies tab; the rest do not.
   const syncs = [];
   function buildControls() {
-    const field = (label, forId, control, onlyBacktests) => {
+    // A label given `help` becomes a term with a popup.
+    const field = (label, forId, control, onlyBacktests, help) => {
       const wrap = el('div', 'control');
-      const lab = el('label', 'control-label', label);
+      const lab = el('label', 'control-label', help ? null : label);
+      if (help) lab.appendChild(term(label, help));
       if (forId) lab.htmlFor = forId;
       else lab.id = 'lbl-' + label.toLowerCase().replace(/\s+/g, '-');
       wrap.append(lab, control);
@@ -627,11 +643,12 @@
     [[true, 'Included'], [false, 'Removed']].forEach(([on, text]) => {
       const b = el('button', 'btn', text);
       b.type = 'button';
+      b.title = on ? `Each trade is charged ${DATA.run.cost_bps} basis points` : 'Show results with no trading cost';
       b.addEventListener('click', () => { state.costs = on; render(); });
       syncs.push(() => { b.setAttribute('aria-pressed', String(state.costs === on)); });
       seg.appendChild(b);
     });
-    nodes.push(field('Trading costs', null, seg, true));
+    nodes.push(field('Trading costs', null, seg, true, costsHelp));
     nodes.push(dropdown(['Strategies', 'filter', DATA.filters.map((f) => [f.id, f.label, !f.present]), false]));
     $('controls').replaceChildren(...nodes);
   }
@@ -647,14 +664,10 @@
     hidePop();   // the terms below are rebuilt, so a popup left open would point at nothing
     $('run').textContent = `Backtests, run ${run.name}`;
 
-    // The caution line only appears when the view on screen is not the experiment's test. The About card carries the rest.
+    // The caution line only appears for a pipeline check. The About card and the Trading costs popup carry the rest.
     const caution = $('caution');
     caution.replaceChildren();
-    if (run.smoke) caution.appendChild(el('span', 'flag', 'Pipeline check, not a finding. '));
-    if (!net) {
-      caution.append(el('span', 'flag', 'Trading costs removed: a what-if view, not the experiment’s test. '),
-        `The test charges ${run.cost_bps} basis points per trade.`);
-    }
+    if (run.smoke) caution.appendChild(el('span', 'flag', 'Pipeline check, not a finding.'));
 
     $('growth-title').textContent = net ? 'Growth of $1, net of costs' : 'Growth of $1, before trading costs';
     const forest = ['Each strategy’s ', term(sharpeName),
@@ -691,24 +704,8 @@
     $('foot').textContent = `Generated from run ${run.name} (commit ${run.commit}, ${run.generated}). Sharpe ratios use returns in excess of ${run.risk_free === 'tbill' ? 'the Treasury bill rate' : 'zero'}. External classifier status: ${status || 'none registered'}.`;
   }
 
-  // ---- About card: what the project tests, why Jev trails, and what other researchers found.
-  // It describes the experiment's primary test, costs included, and does not change with the filters.
-  const RESEARCH = [
-    ['Lopez-Lira and Tang, 2023', 'Can ChatGPT Forecast Stock Price Movements? Return Predictability and Large Language Models', 'https://arxiv.org/abs/2304.07619',
-      'GPT-4’s scores of news headlines predicted the price drift that followed, most for small stocks and negative news. The model was reading news, which this experiment deliberately leaves out.'],
-    ['Li, Kim, Cucuringu and Ma, 2025', 'Can LLM-based Financial Investing Strategies Outperform the Market in Long Run?', 'https://arxiv.org/abs/2505.07078',
-      'Backtested over two decades and more than 100 stocks, the advantages that narrower studies reported for language-model trading strategies shrank considerably.'],
-    ['Tan, Merrill, Gupta, Althoff and Hartvigsen, 2024', 'Are Language Models Actually Useful for Time Series Forecasting?', 'https://arxiv.org/abs/2406.16964',
-      'In three popular forecasters built on language models, removing the language model or swapping it for a simple attention layer did not hurt accuracy and often helped.'],
-    ['Glasserman and Lin, 2023', 'Assessing Look-Ahead Bias in Stock Return Predictions Generated By GPT Sentiment Analysis', 'https://arxiv.org/abs/2309.17322',
-      'What a model already knows about the companies in a headline can distort a backtest; they test this by removing company names. The same concern is why tickers and dates are hidden from Jev here.'],
-    ['Lopez-Lira, Tang and Zhu, 2025', 'The Memorization Problem: Can We Trust LLMs’ Economic Forecasts?', 'https://arxiv.org/abs/2504.14765',
-      'Language models can recall economic and financial figures from before their knowledge cutoff, so their forecasts for those periods may be memory, not prediction.'],
-    ['Grinsztajn, Oyallon and Varoquaux, 2022', 'Why do tree-based models still outperform deep learning on tabular data?', 'https://arxiv.org/abs/2207.08815',
-      'Across 45 tabular datasets, tree-based models such as random forests and gradient boosting still beat deep learning on medium-sized data. Two of the three classifiers here are of that kind.'],
-    ['Gu, Kelly and Xiu, 2020', 'Empirical Asset Pricing via Machine Learning', 'https://www.nber.org/papers/w25398',
-      'Comparing machine-learning methods for predicting stock returns, trees and neural networks did best, and every method leaned on the same signals: momentum, liquidity and volatility. Their data covers far more stocks and predictors than this experiment.'],
-  ];
+  // ---- About card: what the project tests and why Jev trails. It describes the experiment's primary
+  // test, costs included, and does not change with the filters. The arrow in its heading folds it away.
   const JEV_NOTES = 'https://docs.typesafe.ai/model-jaggedness/jev-1.13';
   function drawAbout() {
     const run = DATA.run, P = DATA.models.portfolio;
@@ -727,13 +724,15 @@
       run.smoke || run.full_window ? '' : ' The final two years stay locked until the design is run once on the full window.',
       run.external_ran.length ? '' : ' Jev has not been run, so no Jev strategy appears here.',
       run.hindsight ? ' ' + run.hindsight : '');
-    const what = block('What this project tests',
+    const what = el('div', 'prose');
+    what.append(
       para('Can Jev, a hosted model that answers multiple-choice questions about a piece of text, pick what to hold better than standard machine-learning classifiers? ',
         `After each market close, every strategy sees the same 27 price and volume readings for each of ${run.assets} assets and calls BUY, HOLD or SELL. Jev gets them as text, with no ticker, date or price level.`,
         ` The calls are turned into a portfolio by one rule, and each strategy is compared with simply holding all ${run.assets} assets in equal parts.`),
       status);
 
-    const left = el('div', 'stack'), cells = [left];
+    const left = el('div', 'stack');
+    left.id = 'about-body';
     left.appendChild(what);
     const sig = v.strategies.find((s) => s.group === 'jev');
     const jev = sig && sharpe(sig.id), hold = sharpe('always_buy');
@@ -744,8 +743,26 @@
       const reason = (head, ...parts) => { const li = el('li'); li.append(bold(head + ' '), ...parts); reasons.appendChild(li); };
       reason('Its picks show no edge before costs.',
         `With trading costs left out, Jev’s own calls score ${num(sharpe(sig.id, true))}: ${versus(sharpe(sig.id, true), sharpe('stratified_random', true))} picking assets at random (${num(sharpe('stratified_random', true))}) and ${versus(sharpe(sig.id, true), sharpe('always_buy', true))} buy and hold (${num(sharpe('always_buy', true))}).`);
+      // The popup on the turnover figure lists every strategy's trading, most active first.
+      const turnover = (id) => v.stats[id].annual_turnover;
+      const turnoverHelp = () => {
+        const head = para(bold('Trading per year, main test. '),
+          `How many times each strategy turns over its capital in a year, and what that costs at ${run.cost_bps} basis points per trade.`);
+        const rows = v.strategies.filter((s) => s.chart && s.id !== 'market_buy_and_hold' && turnover(s.id) != null)
+          .sort((a, b) => turnover(b.id) - turnover(a.id))
+          .map((s) => {
+            const t = turnover(s.id), row = el('div', 'tip-row');
+            row.append(el('span', null, s.label), el('span', 'tip-val', `${fixed(t, t < 10 ? 1 : 0)}× · ${fixed(t * run.cost_bps / 100, 1)}%`));
+            return row;
+          });
+        return [head, ...rows];
+      };
+      const trained = v.strategies.filter((s) => s.group === 'index_ml').map((s) => turnover(s.id)).filter((t) => t != null);
+      const others = [trained.length ? `${num(Math.min(...trained), 0)} to ${num(Math.max(...trained), 0)} for the trained classifiers` : '',
+        turnover('stratified_random') != null ? `${num(turnover('stratified_random'), 0)} for picking at random` : ''].filter(Boolean).join(' and ');
       reason('Frequent trading is expensive.',
-        `Its picks change often. It trades ${num(turns, 0)} times its capital a year, which costs about ${fixed(turns * run.cost_bps / 100, 1)}% a year at ${run.cost_bps} basis points per trade and brings its score down to ${num(jev)}.`);
+        'Its picks change often. It ', term(`trades ${num(turns, 0)} times its capital a year`, turnoverHelp), others ? `, against ${others}` : '',
+        `. That costs about ${fixed(turns * run.cost_bps / 100, 1)}% a year at ${run.cost_bps} basis points per trade and brings its score down to ${num(jev)}.`);
       const gbt = sharpe('gbt'), plus = sharpe(plusId);
       reason('It never learns from these markets.',
         'Jev is used as it comes: nothing is fitted to this data, while the classifiers are retrained before every test year.',
@@ -765,15 +782,29 @@
           v.power ? ` A run this size would usually miss a true Sharpe difference smaller than about ${num(v.power.mde_80)}, so it cannot rule out a small edge.` : '')));
     }
 
-    const papers = el('ul', 'papers');
-    RESEARCH.forEach(([who, title, href, finding]) => {
-      const li = el('li');
-      li.append(link(title, href), el('span', 'subtle', who), el('span', null, finding));
-      papers.appendChild(li);
+    // The heading is a button: its arrow folds the card down to this one line. The choice is remembered on this device.
+    const fold = el('button', 'fold');
+    fold.type = 'button';
+    fold.setAttribute('aria-controls', 'about-body');
+    const arrow = svgEl('svg', { viewBox: '0 0 16 16', width: 16, height: 16, 'aria-hidden': 'true' });
+    svgEl('path', { d: 'M3 6l5 5 5-5', fill: 'none', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+      style: 'stroke: currentColor' }, arrow);
+    fold.append('What this project tests', arrow);
+    const heading = el('h2');
+    heading.appendChild(fold);
+    const setOpen = (open) => {
+      left.hidden = !open;
+      fold.setAttribute('aria-expanded', String(open));
+      fold.title = open ? 'Hide this summary' : 'Show this summary';
+    };
+    fold.addEventListener('click', () => {
+      setOpen(left.hidden);
+      try { localStorage.setItem('about-open', String(!left.hidden)); } catch (e) { /* storage can be blocked; the card still folds */ }
     });
-    cells.push(block('What other researchers found', papers,
-      el('p', 'subtle', 'The one-line summaries are mine. Follow the links for the papers themselves.')));
-    $('about').replaceChildren(...cells);
+    let saved = null;
+    try { saved = localStorage.getItem('about-open'); } catch (e) { /* as above */ }
+    setOpen(saved !== 'false');
+    $('about').replaceChildren(heading, left);
   }
 
   function render() {

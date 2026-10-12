@@ -239,13 +239,13 @@
           <div class="stats">
             <div class="stat"><span class="stat__n">0 of 8</span><span class="stat__l">strategies beat equal-weight buy and hold</span></div>
             <div class="stat"><span class="stat__n">0.11</span><span class="stat__l">net Sharpe for Jev alone; picking at random got 0.21</span></div>
-            <div class="stat"><span class="stat__n">0.00</span><span class="stat__l">change in Sharpe from adding Jev's outputs to the trees</span></div>
+            <div class="stat"><span class="stat__n">+0.00</span><span class="stat__l">change in Sharpe on the main test from adding Jev's outputs to the trees</span></div>
             <div class="stat"><span class="stat__n">50,940</span><span class="stat__l">asset-days scored by Jev, for $5.76</span></div>
           </div>
 
           <ul class="recon__finds">
             <li><strong>Jev alone did not rank assets.</strong> Its picks earned a net Sharpe of 0.11, under the 0.21 of a random pick and reliably below buy and hold (−0.41, 95% interval −0.72 to −0.14).</li>
-            <li><strong>Adding Jev to a classifier changed nothing.</strong> Gradient-boosted trees scored 0.25 on the 27 readings and 0.26 with Jev's outputs added (difference 0.00, interval −0.17 to +0.16).</li>
+            <li><strong>Adding Jev to a classifier changed nothing.</strong> Gradient-boosted trees scored 0.25 on the 27 readings and 0.26 with Jev's outputs added (difference 0.00, interval −0.17 to +0.16). In most other views the change is slightly negative, and never reliably different from zero.</li>
             <li><strong>Nothing beat holding everything.</strong> The best strategy, a random forest, reached 0.40 against 0.52. This run would usually miss a true difference smaller than about 0.43.</li>
           </ul>
           <p class="recon__caveat">Not a verdict yet: these are the first ten yearly folds with zero-shot Jev, and the final two years stay locked for the verdict run. The asset list was chosen with hindsight. Every table is in the <a href="https://github.com/dylanlooyq/jev-stock-trader/blob/main/results/mixed15_dev_full/report.md" target="_blank" rel="noopener">run report</a>. Research, not investment advice.</p>
