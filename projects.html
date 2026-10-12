@@ -30,9 +30,9 @@
   <link rel="stylesheet" href="/assets/site.css">
   <style>
 /* Page-specific bits; everything else comes from site.css */
-/* The header is just the jump links; the heading stays in the page for screen readers and search engines */
-.page-head { padding-block: clamp(28px, 5vw, 48px) clamp(20px, 3vw, 32px); }
-.page-head h1 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.page-head { padding-block: clamp(36px, 6vw, 72px) clamp(24px, 4vw, 40px); }
+.page-head h1 { font-size: clamp(38px, 6vw, 68px); max-width: 16ch; margin-bottom: 24px; }
+.page-head h1 em { font-style: italic; background: linear-gradient(100deg, var(--accent-ink), var(--accent)); -webkit-background-clip: text; background-clip: text; color: transparent; padding-right: .06em; }
 .jump { display: flex; flex-wrap: wrap; gap: 10px; }
 
 .card--link { display: flex; flex-direction: column; }
@@ -169,7 +169,6 @@
         <a href="/#experience">Experience</a>
         <a href="/#education">Education</a>
         <a href="/#certifications">Certifications</a>
-        <a href="/#beyond">Beyond work</a>
         <a href="/projects" class="is-active" aria-current="page">Projects</a>
         <a href="#contact">Contact</a>
       </nav>
@@ -185,7 +184,7 @@
 
   <main id="main">
     <section class="page-head wrap">
-      <h1>Things I build outside of work</h1>
+      <h1>Things I build <em>outside</em> of work.</h1>
       <div class="jump" aria-label="Jump to a section">
         <a class="btn btn--ghost btn--sm" href="#quant">Quant</a>
         <a class="btn btn--ghost btn--sm" href="#data-engineering">Data engineering</a>
