@@ -6,6 +6,8 @@
 //   GET  /game/download   streams the Beat Beat City build for that link (GAME_BUCKET)
 //   GET  /game/looks/<sha256>.pack   a pack of the game's look store, fetched by the installed game
 //                         itself before it first opens (no key: see lookPack below)
+//   GET  /game/update/windows            which version is current, for the installed game (see gameUpdate below)
+//   GET  /game/update/windows/<sha256>   that version's installer
 //
 // Game access keys are KV entries (GAME_KEYS): key = the access key, value = who it was
 // issued to. Mint and revoke them with `node keys.mjs` (see README.md).
@@ -99,6 +101,13 @@ export default {
     if (pack) {
       if (request.method !== 'GET') return fail(405, 'Method not allowed');
       return lookPack(request, env, pack[1], fail);
+    }
+
+    // The installed game again: no Origin, and its build's update token instead of a key (see gameUpdate).
+    const update = /^\/game\/update\/windows(?:\/([0-9a-f]{64}))?$/.exec(url.pathname);
+    if (update) {
+      if (request.method !== 'GET') return fail(405, 'Method not allowed');
+      return gameUpdate(request, env, update[1], fail);
     }
 
     const route = { '/cv': cv, '/game/unlock': unlock }[url.pathname];
@@ -249,6 +258,48 @@ async function lookPack(request, env, name, fail) {
   const obj = await env.GAME_BUCKET.get(`looks/${name}`, { range: request.headers });
   if (!obj) return fail(404, 'Not found');
   return ranged(request, obj, { 'Content-Type': 'application/octet-stream', 'Cache-Control': 'public, max-age=31536000, immutable' });
+}
+
+// The installed Windows game updates itself (the game repo's setup-update.cjs): at launch it asks which
+// version is current and, when the player says yes, fetches that version's installer. It has no access
+// key to send, and the download must stay behind the key for anyone who never had the game, so every
+// build carries an update token (the `X-BBC-Update` header) and only a token of a published build is
+// answered: tools/publish-builds.mjs writes the SHA-256 of each one into update/tokens.json, and the
+// update itself (version, object name, size, SHA-256, signature) into update/windows.json. The game
+// runs nothing whose signature is not the owner's, so what is handed out here is not trusted for that.
+//   GET /game/update/windows            { version, bytes, sha256, sig }
+//   GET /game/update/windows/<sha256>   the installer of that SHA-256, with Range
+const UPDATE_TOKENS = 'update/tokens.json';
+const UPDATE_INFO = 'update/windows.json';
+
+const sha256Hex = async (text) =>
+  [...new Uint8Array(await crypto.subtle.digest('SHA-256', enc.encode(text)))].map((b) => b.toString(16).padStart(2, '0')).join('');
+
+async function gameUpdate(request, env, sha256, fail) {
+  const token = request.headers.get('X-BBC-Update') || '';
+  if (!/^[0-9a-f]{32,128}$/.test(token)) return fail(403, 'Forbidden');
+  let tokens;
+  let info;
+  try {
+    tokens = await (await env.GAME_BUCKET.get(UPDATE_TOKENS))?.json();
+    if (!tokens || !Object.hasOwn(tokens, await sha256Hex(token))) return fail(403, 'Forbidden');
+    info = await (await env.GAME_BUCKET.get(UPDATE_INFO))?.json();
+  } catch {
+    return fail(503, 'Update unavailable');
+  }
+  if (!info || typeof info.file !== 'string' || !/^[\w.-]+$/.test(info.file)) return fail(404, 'Not found');
+
+  if (!sha256) {
+    const { version, bytes, sha256: hash, sig } = info;
+    return new Response(JSON.stringify({ version, bytes, sha256: hash, sig }), {
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+    });
+  }
+  // An installer that is no longer the current one: the game says so and asks again at its next launch.
+  if (sha256 !== info.sha256) return fail(404, 'Not found');
+  const obj = await env.GAME_BUCKET.get(info.file, { range: request.headers });
+  if (!obj) return fail(404, 'Not found');
+  return ranged(request, obj, { 'Content-Type': 'application/octet-stream', 'Cache-Control': 'private, no-store' });
 }
 
 // An R2 object as a response that honours Range (206 and Content-Range when a range was asked for).

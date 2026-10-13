@@ -8,6 +8,7 @@ Worker's URL.
 | --- | --- | --- |
 | `POST /cv` | Cloudflare Turnstile captcha | CV PDF (`dylan-cv` bucket) |
 | `POST /game/unlock` → `GET /game/download` | Access key from you | Beat Beat City builds (`beat-beat-city` bucket) |
+| `GET /game/update/windows` and `/game/update/windows/<sha256>` | The build's update token (`X-BBC-Update`), listed in the bucket when that build was published | Which version is current, and its installer, for the installed Windows game |
 | `GET /game/looks/<sha256>.pack` | None (the name is the SHA-256 of the pack, listed only inside the installer) | The look-store packs the installed Windows game fetches before it first opens (`looks/` in the same bucket) |
 
 Cloudflare's free tier is enough for all of it. One-time prerequisite, from this `worker/` folder:
@@ -56,6 +57,16 @@ fetches the zip from R2 with a normal progress bar (and resume, if the connectio
    `/game/looks/<sha256>.pack` with Range (a dropped download goes on from where it stopped). No key:
    a pack is named by the hash of its contents, which only the installer knows, and holds outfit
    geometry that is of no use without the game. The route is in `index.js` (deployed 2026-10-11).
+
+   **In-app update.** The installed Windows game asks at launch which version is current
+   (`GET /game/update/windows`) and, when the player says yes, fetches that version's installer
+   (`GET /game/update/windows/<sha256>`, with Range). It has no access key to send, so every build
+   carries an update token (the `X-BBC-Update` header) and the Worker answers only a token of a
+   published build: `publish-builds.mjs` writes each token's SHA-256 into `update/tokens.json` and the
+   update itself (version, object name, size, SHA-256, the owner's signature) into
+   `update/windows.json`. Deleting a line from `update/tokens.json` shuts that build out. The game runs
+   only an installer signed with the owner's key, so the Worker is not what is trusted. Check the
+   routes against a stand-in bucket with `node update-routes-check.mjs`.
 
    **Deploy this Worker with `wrangler deploy --config wrangler.toml`.** The site's own Worker has a
    `wrangler.jsonc` one folder up, and wrangler 4 finds that one first even from inside `worker/`:
