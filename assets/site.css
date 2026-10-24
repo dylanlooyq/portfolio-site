@@ -635,3 +635,5 @@ html { scroll-padding-top: 96px; }
 .project--linkcable { box-shadow: var(--shadow), 0 0 0 1px rgba(229, 72, 77, .18), 0 0 34px -10px rgba(229, 72, 77, .36); }
 .project--linkcable .project__stage { background: #141317; }
 .project--linkcable .project__stage::after { content: none; }
+/* The art's logo-to-cards block sits a little above the image's middle; 44% centres it in the cropped stage */
+.project--linkcable .project__bg { object-position: 50% 44%; }
