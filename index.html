@@ -847,12 +847,10 @@
   <script>
 // Public settings for the download gates (nothing secret belongs in this file).
 // Fill these in after deploying the Worker in /worker (see worker/README.md).
-// While empty, the CV and Beat Beat City buttons fall back to "request by email".
+// While empty, the CV button falls back to "request by email".
 window.SITE_CONFIG = {
   turnstileSiteKey: "0x4AAAAAAFNWfM7vv__pNqx1",   // Cloudflare Turnstile *site* key
-  cvEndpoint: "https://dylan-cv.dylanlyq.workers.dev/cv",
-  gameEndpoint: "https://dylan-cv.dylanlyq.workers.dev/game",
-  googleClientId: "58565878223-qqbgvqh3gs15s2erj07ns1515b3n8dbg.apps.googleusercontent.com"   // Google Sign-In (public)
+  cvEndpoint: "https://dylan-cv.dylanlyq.workers.dev/cv"
 };
 </script>
   <script>

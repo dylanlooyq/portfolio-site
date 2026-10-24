@@ -636,3 +636,13 @@ html { scroll-padding-top: 96px; }
 .dialog p.dialog__hint { font-size: 13px; }
 
 @media (prefers-reduced-motion: reduce) { .dot { animation: none; } }
+/* Games: Beat Beat City and Link Cable side by side from laptop width */
+.project-pair { display: grid; gap: 16px; }
+@media (min-width: 1000px) {
+  .project-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+  .project-pair .project__body { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .project-pair .project__stage { min-height: 300px; }
+}
+.project--linkcable { box-shadow: var(--shadow), 0 0 0 1px rgba(229, 72, 77, .18), 0 0 34px -10px rgba(229, 72, 77, .36); }
+.project--linkcable .project__stage { background: #141317; }
+.project--linkcable .project__stage::after { content: none; }
