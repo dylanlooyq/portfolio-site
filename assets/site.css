@@ -625,7 +625,11 @@ html { scroll-padding-top: 96px; }
 /* Games: Beat Beat City and Link Cable side by side from laptop width */
 .project-pair { display: grid; gap: 16px; }
 @media (min-width: 1000px) {
-  .project-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+  /* Equal-height cards; the button row sits on the bottom edge of both */
+  .project-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .project-pair .project { display: flex; flex-direction: column; }
+  .project-pair .project__body, .project-pair .project__body > div { display: flex; flex-direction: column; flex: 1; }
+  .project-pair .project__watch { margin-top: auto; padding-top: 16px; }
   .project-pair .project__stage { min-height: 220px; }
 }
 .project--linkcable { box-shadow: var(--shadow), 0 0 0 1px rgba(229, 72, 77, .18), 0 0 34px -10px rgba(229, 72, 77, .36); }
