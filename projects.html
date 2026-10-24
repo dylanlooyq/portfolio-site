@@ -362,17 +362,8 @@
             <h3>Beat Beat City</h3>
             <p>A neon-lit rhythm game I built in my spare time. It's a private demo for now, for Windows and macOS.</p>
             <div class="project__buttons project__watch">
-              <button class="btn btn--ghost" type="button" id="watchGameplay"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Watch gameplay</button>
-            </div>
-          </div>
-          <div class="project__get">
-            <h4>Demo</h4>
-            <div class="project__buttons">
               <a class="btn btn--primary" href="#contact" data-demo-request><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>Email me for demo</a>
-            </div>
-            <p class="project__note">Current version: <b><span data-game-version>0.4.2</span></b> (Demo)</p>
-            <div class="project__buttons project__changelog">
-              <button class="btn btn--ghost btn--sm" type="button" id="viewChangelog">View the changelog</button>
+              <button class="btn btn--ghost" type="button" id="watchGameplay"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Watch gameplay</button>
             </div>
           </div>
         </div>
@@ -385,15 +376,13 @@
           <div>
             <p class="card__tag">Personal project · Web app</p>
             <h3>Link Cable</h3>
-            <p>Classic Pokémon games, played together in the browser. Up to 8 players see each other walk around the same map, trade, and link battle in real time, across Game Boy Color, GBA and DS games and a dozen ROM hacks.</p>
+            <p>Classic Pokémon games, played together in the browser. Up to 8 players see each other walk around the same map, trade, and link battle in real time, across Game Boy Color, GBA and DS games and a dozen ROM hacks. Free, nothing to install. Bring your own ROM.</p>
             <p class="card__stack">TypeScript · mGBA &amp; DeSmuME in WebAssembly · Cloudflare Workers &amp; Durable Objects</p>
-          </div>
-          <div class="project__get">
-            <h4>Play</h4>
-            <div class="project__buttons">
+            <div class="project__buttons project__watch">
               <a class="btn btn--primary" href="https://linkcable.app" target="_blank" rel="noopener">Open linkcable.app&nbsp;↗</a>
+              <a class="btn btn--ghost" href="https://www.instagram.com/linkcable.app/" target="_blank" rel="noopener">Instagram&nbsp;↗</a>
+              <a class="btn btn--ghost" href="https://www.tiktok.com/@linkcable.app" target="_blank" rel="noopener">TikTok&nbsp;↗</a>
             </div>
-            <p class="project__note">Free, nothing to install. Bring your own ROM.</p>
           </div>
         </div>
       </article>
@@ -463,40 +452,6 @@
     <div class="dialog__inner">
       <video class="dialog__video" id="gameplayVideo" controls playsinline preload="none" poster="assets/video/beatbeatcity-gameplay-poster.jpg"></video>
       <div class="dialog__actions"><button class="btn btn--ghost" type="button" id="videoClose">Close</button></div>
-    </div>
-  </dialog>
-
-  <!-- The list between the changelog marks is written by the game repo: node tools/changelog.mjs <from> --from-name <version> --site -->
-  <dialog class="dialog dialog--changelog" id="changelogDialog" aria-labelledby="changelogTitle">
-    <div class="dialog__inner">
-      <h2 id="changelogTitle">Beat Beat City <span data-game-version>0.4.2</span></h2>
-      <div class="changelog">
-        <!-- changelog:start -->
-        <p class="changelog__span">What's new since <b>0.4.1</b></p>
-        <h3>Stages and Story</h3>
-        <ul>
-          <li><b>13</b> new stages</li>
-        </ul>
-        <h3>Shopping Mall: accessories</h3>
-        <ul>
-          <li><b>2</b> new glasses and sunglasses</li>
-        </ul>
-        <h3>Shopping Mall: hair, face and body</h3>
-        <ul>
-          <li><b>11</b> new pairs of eyes</li>
-          <li><b>11</b> new painted faces</li>
-          <li><b>10</b> new hairstyles</li>
-          <li><b>2</b> new head shapes</li>
-          <li><b>1</b> new pair of eyebrows</li>
-          <li><b>1</b> new mouth</li>
-        </ul>
-        <h3>Gameplay looks and sounds</h3>
-        <ul>
-          <li><b>1</b> new arrow design</li>
-        </ul>
-        <!-- changelog:end -->
-      </div>
-      <div class="dialog__actions"><button class="btn btn--ghost" type="button" id="changelogClose">Close</button></div>
     </div>
   </dialog>
 
@@ -620,12 +575,6 @@ window.SITE_CONFIG = {
   document.getElementById('videoClose').addEventListener('click', function () { videoDialog.close(); });
   videoDialog.addEventListener('close', function () { gameplayVideo.pause(); });
   videoDialog.addEventListener('click', function (e) { if (e.target === videoDialog) videoDialog.close(); });   // click the backdrop
-
-  // ── Beat Beat City changelog ──
-  var changelogDialog = document.getElementById('changelogDialog');
-  document.getElementById('viewChangelog').addEventListener('click', function () { changelogDialog.showModal(); });
-  document.getElementById('changelogClose').addEventListener('click', function () { changelogDialog.close(); });
-  changelogDialog.addEventListener('click', function (e) { if (e.target === changelogDialog) changelogDialog.close(); });   // click the backdrop
 
   // ── Beat Beat City: the demo is sent by email ──
   var demoRequest = 'mailto:' + email + '?subject=' + encodeURIComponent('Beat Beat City demo');
